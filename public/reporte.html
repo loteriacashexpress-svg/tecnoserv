@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte Técnico Operativo - COQUIVACOA C.A</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .section-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
+    .checklist-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+    .checklist-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; background: #fff; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; }
+    .checklist-row label { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 240px; cursor: pointer; font-weight: 500; }
+    .checklist-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary, #2563EB); cursor: pointer; }
+    .checklist-row input[type="text"] { flex: 1.5; min-width: 180px; padding: 0.35rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem; }
+    .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+    .preview-thumb { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; }
+  </style>
+</head>
+<body>
+
+  <header style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+    <img src="Logo.jpg" alt="Logo Coquivacoa C.A." style="max-height: 70px; width: auto; object-fit: contain; background: white; padding: 4px; border-radius: 6px;">
+    <h1>COQUIVACOA C.A. - Reporte de Campo</h1>
+    <p>Checklist con Detalles y Envío vía WhatsApp</p>
+    <button onclick="window.location.href='dashboard.html'" style="width: auto; padding: 0.4rem 1rem; margin-top: 0.5rem; background: #374151;">⬅️ Volver al Panel</button>
+  </header>
+
+  <div class="container">
+    <form id="formReporteWhatsApp" onsubmit="enviarReporteWhatsApp(event)">
+      
+      <!-- Datos del Técnico y Estación -->
+      <div class="section-box">
+        <h2>👨‍🔧 Datos del Técnico y Estación</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del Técnico</label>
+            <input type="text" id="repTecnicoNombre" readonly style="background: #e5e7eb; cursor: not-allowed; font-weight: bold; color: #1f2937;">
+          </div>
+          <div class="form-group">
+            <label>Nombre de la EDS (PDVSA)</label>
+            <input type="text" id="repEds" placeholder="Ej. EDS El Amparo / PDVSA" required>
+          </div>
+          <div class="form-group">
+            <label>Tipo de Intervención</label>
+            <select id="repTipoMantenimiento" required>
+              <option value="">-- Seleccione Tipo --</option>
+              <option value="Preventivo">Preventivo</option>
+              <option value="Correctivo">Correctivo</option>
+              <option value="Emergencia">Emergencia</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fecha del Servicio</label>
+            <input type="date" id="repFecha" required>
+          </div>
+          <div class="form-group">
+            <label>Hora de Entrada</label>
+            <input type="time" id="repHoraEntrada" required>
+          </div>
+          <div class="form-group">
+            <label>Hora de Salida</label>
+            <input type="time" id="repHoraSalida" required>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Número WhatsApp Destino / Teléfono del Supervisor</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="tel" id="repWhatsappNum" placeholder="Ej. 584121234567" required style="flex: 1;">
+              <select id="selectContactoRapido" onchange="seleccionarContactoRapido(this.value)" style="flex: 1;">
+                <option value="">-- Contactos Frecuentes / Supervisor --</option>
+                <option value="584121234567">Central / Operaciones Coquivacoa</option>
+                <option value="584149876543">Supervisor Guardia PDVSA</option>
+              </select>
+            </div>
+            <small style="color: #666;">Incluye código de país (Ej: 58...) o selecciona un contacto rápido.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHECKLIST DE INSPECCIÓN CON DETALLES -->
+      <div class="section-box">
+        <h2>📋 Checklist de Inspección Operativa</h2>
+
+        <!-- A. SISTEMA MECÁNICO E HIDRÁULICO -->
+        <h3 style="color: #1e293b; margin-top: 1rem; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3rem;">A. SISTEMA MECÁNICO E HIDRÁULICO</h3>
+        <div class="checklist-list" id="grupoMecanico">
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="1. Mangueras, picos, break away, swivel"> 1. Mangueras, picos, break away, swivel</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="2. Válvula de seguridad"> 2. Válvula de seguridad</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="3. Contenedor"> 3. Contenedor</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="4. Chasis del dispensador"> 4. Chasis del dispensador</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="5. Línea de succión"> 5. Línea de succión</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="6. Medidores"> 6. Medidores</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="7. Totalizadores"> 7. Totalizadores</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="8. Unidad bomba succión propia"> 8. Unidad bomba succión propia</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+        </div>
+
+        <!-- B. SISTEMA ELÉCTRICO -->
+        <h3 style="color: #1e293b; margin-top: 1.5rem; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3rem;">B. SISTEMA ELÉCTRICO</h3>
+        <div class="checklist-list" id="grupoElectrico">
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="9. Válvula solenoide"> 9. Válvula solenoide</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="10. Caja de empalme"> 10. Caja de empalme</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="11. Unidad bomba"> 11. Unidad bomba</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="12. Micro interruptor de pico"> 12. Micro interruptor de pico</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+        </div>
+
+        <!-- C. SISTEMA ELECTRÓNICO -->
+        <h3 style="color: #1e293b; margin-top: 1.5rem; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3rem;">C. SISTEMA ELECTRÓNICO</h3>
+        <div class="checklist-list" id="grupoElectronico">
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="13. Cabezal electrónico"> 13. Cabezal electrónico</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="14. Placa electrónica"> 14. Placa electrónica</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="15. Barrera de seguridad intrínseca"> 15. Barrera de seguridad intrínseca</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="16. Generador de pulsos (Pulser)"> 16. Generador de pulsos (Pulser)</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="17. Batería"> 17. Batería</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="18. Cabezal de bomba"> 18. Cabezal de bomba</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="19. Contenedores y tranquilla"> 19. Contenedores y tranquilla</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="20. Acometida eléctrica"> 20. Acometida eléctrica</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="21. Bomba sumergible"> 21. Bomba sumergible</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+          <div class="checklist-row"><label><input type="checkbox" name="chk" value="22. Mantenimiento en tanques"> 22. Mantenimiento en tanques</label><input type="text" class="chk-detalle" placeholder="Detalle opcional..."></div>
+        </div>
+      </div>
+
+      <!-- D. ANEXO C ART -->
+      <div class="section-box">
+        <h2>📄 D. ANEXO C ART</h2>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>Observaciones / Detalles del Anexo C ART</label>
+          <textarea id="repAnexoC" rows="2" placeholder="Ingrese detalles del Análisis de Riesgo en el Trabajo (ART)..."></textarea>
+        </div>
+      </div>
+
+      <!-- E. EVALUACIÓN DE BOMBAS Y ALIMENTACIÓN -->
+      <div class="section-box">
+        <h2>⚡ E. EVALUACIÓN DE BOMBAS</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Corriente (Hz)</label>
+            <input type="text" id="evalHz" placeholder="Ej. 60 Hz">
+          </div>
+          <div class="form-group">
+            <label>Voltaje (V)</label>
+            <input type="text" id="evalVolt" placeholder="Ej. 220V / 380V">
+          </div>
+          <div class="form-group">
+            <label>Amperaje (A)</label>
+            <input type="text" id="evalAmp" placeholder="Ej. 12.5 A">
+          </div>
+          <div class="form-group">
+            <label>Fuente de Alimentación</label>
+            <select id="evalFuente">
+              <option value="">-- Seleccionar Fuente --</option>
+              <option value="Red pública">Red pública</option>
+              <option value="Planta eléctrica">Planta eléctrica</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Observaciones Generales -->
+      <div class="section-box">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>Observaciones / Diagnóstico Final / Repuestos Utilizados</label>
+          <textarea id="repObservaciones" rows="3" placeholder="Describa brevemente los trabajos ejecutados..." required></textarea>
+        </div>
+      </div>
+
+      <!-- Registro Fotográfico Unificado -->
+      <div class="section-box">
+        <h2>📸 Registro Fotográfico</h2>
+        <div class="form-group" style="margin-bottom: 0;">
+          <input type="file" id="filesGeneral" accept="image/*" multiple onchange="previsualizarImagenes()">
+          <div id="previewGeneral" class="preview-grid"></div>
+        </div>
+      </div>
+
+      <!-- Botón de Envío -->
+      <div class="section-box" style="text-align: center;">
+        <button type="submit" style="background: #25D366; font-size: 1.1rem; padding: 0.9rem 2rem; width: 100%;">📲 Generar Reporte y Enviar por WhatsApp</button>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const userName = sessionStorage.getItem('userName') || 'Técnico de Campo';
+      document.getElementById('repTecnicoNombre').value = userName;
+
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('repFecha').value = hoy;
+      
+      const horaActual = new Date().toTimeString().slice(0,5);
+      document.getElementById('repHoraEntrada').value = horaActual;
+    });
+
+    function seleccionarContactoRapido(valor) {
+      if(valor) {
+        document.getElementById('repWhatsappNum').value = valor;
+      }
+    }
+
+    function previsualizarImagenes() {
+      const input = document.getElementById('filesGeneral');
+      const container = document.getElementById('previewGeneral');
+      container.innerHTML = '';
+
+      Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'preview-thumb';
+          container.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function enviarReporteWhatsApp(e) {
+      e.preventDefault();
+
+      const tecnico = document.getElementById('repTecnicoNombre').value;
+      const eds = document.getElementById('repEds').value;
+      const tipo = document.getElementById('repTipoMantenimiento').value;
+      const fecha = document.getElementById('repFecha').value;
+      const entrada = document.getElementById('repHoraEntrada').value;
+      const salida = document.getElementById('repHoraSalida').value;
+      const obs = document.getElementById('repObservaciones').value;
+      const anexoC = document.getElementById('repAnexoC').value || 'Sin novedades';
+      const telefono = document.getElementById('repWhatsappNum').value;
+
+      // Recopilar items del checklist y sus notas de detalle opcionales
+      const rows = document.querySelectorAll('.checklist-row');
+      let checklistTexto = '';
+      let hayItems = false;
+
+      rows.forEach(row => {
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        const detalleInput = row.querySelector('.chk-detalle');
+        if (checkbox.checked) {
+          hayItems = true;
+          let textoItem = `  - ${checkbox.value}`;
+          if (detalleInput && detalleInput.value.trim() !== '') {
+            textoItem += ` (Nota: ${detalleInput.value.trim()})`;
+          }
+          checklistTexto += `${textoItem}\n`;
+        }
+      });
+
+      if (!hayItems) {
+        checklistTexto = '  (Ningún ítem marcado específicamente)\n';
+      }
+
+      // Datos de evaluación de bombas
+      const hz = document.getElementById('evalHz').value || 'N/D';
+      const volt = document.getElementById('evalVolt').value || 'N/D';
+      const amp = document.getElementById('evalAmp').value || 'N/D';
+      const fuente = document.getElementById('evalFuente').value || 'N/D';
+
+      const totalFotos = document.getElementById('filesGeneral').files.length;
+
+      const textoMensaje = `*REPORTE TÉCNICO - COQUIVACOA C.A.*\n\n` +
+        `👨‍🔧 *Técnico:* ${tecnico}\n` +
+        `🏢 *EDS (PDVSA):* ${eds}\n` +
+        `🛠️ *Tipo de Servicio:* ${tipo}\n` +
+        `📅 *Fecha:* ${fecha}\n` +
+        `⏰ *Entrada:* ${entrada} | *Salida:* ${salida}\n\n` +
+        `📋 *CHECKLIST DE INSPECCIÓN:*\n${checklistTexto}\n` +
+        `📄 *D. ANEXO C ART:*\n${anexoC}\n\n` +
+        `⚡ *E. EVALUACIÓN DE BOMBAS:*\n` +
+        `- Corriente: ${hz} Hz\n` +
+        `- Voltaje: ${volt} V\n` +
+        `- Amperaje: ${amp} A\n` +
+        `- Fuente: ${fuente}\n\n` +
+        `📝 *Observaciones y Diagnóstico:*\n${obs}\n\n` +
+        `📸 *Registro Fotográfico:* ${totalFotos} archivos seleccionados`;
+
+      navigator.clipboard.writeText(textoMensaje).then(() => {
+        alert('¡Reporte generado! El texto se ha copiado al portapapeles. A continuación se abrirá WhatsApp: pega el mensaje y adjunta tus fotos.');
+      }).catch(() => {
+        alert('¡Reporte generado! Se abrirá WhatsApp a continuación.');
+      });
+
+      const urlWhatsApp = `https://wa.me/${telefono}?text=${encodeURIComponent(textoMensaje)}`;
+      window.open(urlWhatsApp, '_blank');
+    }
+  </script>
+</body>
+</html>

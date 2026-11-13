@@ -1,0 +1,289 @@
+:root {
+  --pdvsa-red: #E31B23;
+  --pdvsa-red-dark: #B71C1C;
+  --pdvsa-dark: #111827;
+  --pdvsa-gray: #374151;
+  --bg-main: #F4F6F9;
+  --card-bg: #FFFFFF;
+  --border-color: #E5E7EB;
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--pdvsa-dark);
+  line-height: 1.6;
+  padding-bottom: 3rem;
+}
+
+/* Header Corporativo Elegante */
+header {
+  background: linear-gradient(135deg, var(--pdvsa-dark) 0%, #1F2937 100%);
+  color: white;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-bottom: 5px solid var(--pdvsa-red);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.5rem;
+}
+
+header p {
+  color: #9CA3AF;
+  font-size: 1.1rem;
+  font-weight: 300;
+}
+
+/* Contenedor Principal en Rejilla */
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+    padding: 0 1rem;
+  }
+}
+
+/* Tarjetas Rejilla Modernas */
+.card {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 30px -10px rgba(227, 27, 35, 0.1);
+  border-color: rgba(227, 27, 35, 0.3);
+}
+
+/* Encabezados de Tarjetas */
+h2 {
+  color: var(--pdvsa-dark);
+  font-size: 1.35rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--bg-main);
+}
+
+h2::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 24px;
+  background-color: var(--pdvsa-red);
+  border-radius: 3px;
+}
+
+/* Grilla de Formularios Internos */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--pdvsa-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+input, select, textarea {
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: #FAFAFA;
+  transition: var(--transition-smooth);
+  color: var(--pdvsa-dark);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--pdvsa-red);
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(227, 27, 35, 0.1);
+}
+
+/* Botones Interactivos de Alto Rendimiento */
+button {
+  background: linear-gradient(135deg, var(--pdvsa-red) 0%, var(--pdvsa-red-dark) 100%);
+  color: white;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  width: 100%;
+  margin-top: 1.2rem;
+  box-shadow: 0 4px 12px rgba(227, 27, 35, 0.25);
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+button:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 16px rgba(227, 27, 35, 0.35);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Tablas Modernas */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+th {
+  background-color: #F87171;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background-color: #FEF2F2;
+}
+
+img.thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+}
+
+/* Árbol de Fallas / Diagnóstico */
+.tree {
+  margin-top: 1rem;
+}
+
+.tree-node {
+  margin: 0.75rem 0;
+  padding: 1rem;
+  background: #F9FAFB;
+  border-left: 5px solid var(--pdvsa-dark);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-left-width: 5px;
+}
+
+.tree-child {
+  margin-left: 1.5rem;
+  background: #FFFFFF;
+  border-left-color: var(--pdvsa-red);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-operativo { 
+  background-color: #D1FAE5; 
+  color: #065F46; 
+}
+
+.status-falla { 
+  background-color: #FEE2E2; 
+  color: #991B1B; 
+}
+
+/* Botón flotante de visibilidad de password */
+.toggle-password-btn {
+  position: absolute;
+  right: 12px;
+  top: 36px;
+  background: transparent;
+  border: none;
+  color: var(--pdvsa-gray);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: none;
+  width: auto;
+}
+
+.toggle-password-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+  box-shadow: none;
+  transform: none;
+}

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Operativo - COQUIVACOA C.A</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Estilo elegante para el botón de reportes */
+    .btn-reporte-header {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+      font-weight: bold;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2);
+      transition: all 0.2s ease-in-out;
+      text-decoration: none;
+      width: auto !important;
+      margin-top: 0.75rem;
+    }
+    .btn-reporte-header:hover {
+      background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(5, 150, 105, 0.3);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
+    <!-- Logo Estático -->
+    <img src="Logo.jpg" alt="Logo Coquivacoa C.A." style="max-height: 70px; width: auto; object-fit: contain; background: white; padding: 4px; border-radius: 6px;">
+    
+    <h1>COQUIVACOA C.A. - Panel de Control</h1>
+    <p id="userRoleSubtitle">Mantenimiento de Surtidores y Dispensadores</p>
+    
+    <!-- Botón Elegante de Reporte Fotográfico -->
+    <div>
+      <button onclick="window.location.href='reporte.html'" class="btn-reporte-header">
+        📷 Generar Reporte Fotográfico WhatsApp
+      </button>
+    </div>
+
+    <button onclick="window.location.href='index.html'" style="width: auto; padding: 0.3rem 0.8rem; margin-top: 0.5rem; background: #374151; font-size: 0.85rem;">🚪 Cerrar Sesión</button>
+  </header>
+
+  <div class="container">
+    
+    <!-- Sección Administrador: Registro de Equipo -->
+    <div class="card" id="cardRegistroEquipo">
+      <h2>1. Registro de Surtidor / Dispensador / GLP</h2>
+      <form id="formEquipo">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Código de Equipo</label>
+            <input type="text" id="eqCodigo" placeholder="EJ: SUR-001" required>
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="eqTipo">
+              <option value="Surtidor">Surtidor (Combustibles)</option>
+              <option value="Dispensador">Dispensador</option>
+              <option value="GLP / Solgas">SOLGAS /  (Solgas)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fabricante / Marca</label>
+            <select id="eqMarca" required>
+              <option value="">-- Seleccione Marca --</option>
+              <option value="Wayne">Wayne</option>
+              <option value="Tokheim">Tokheim</option>
+              <option value="Realtech">Realtech</option>
+              <option value="Eaglestar">Eaglestar</option>
+              <option value="Solgas">Solgas</option>
+              <option value="Gilbarco">Gilbarco</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Modelo</label>
+            <input type="text" id="eqModelo" placeholder="EJ: Helix / Vista / Quantium" required>
+          </div>
+          <div class="form-group">
+            <label>Año</label>
+            <input type="number" id="eqAnio" value="2024" required>
+          </div>
+          <div class="form-group">
+            <label>Imagen (Cámara / Galería)</label>
+            <input type="file" id="eqImagenFile" accept="image/*">
+            <input type="hidden" id="eqImagenUrl">
+          </div>
+        </div>
+        <button type="submit">Guardar Equipo en BD</button>
+      </form>
+    </div>
+
+    <!-- Sección Administrador: Fases y Catálogo de Fallas -->
+    <div class="card" id="cardCatalogoFallas">
+      <h2>2. Registro de Fallas y Mantenimiento Preventivo</h2>
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label>Seleccionar Equipo</label>
+        <select id="selectEquipoFallas"></select>
+      </div>
+      <form id="formFalla">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Código de Falla</label>
+            <input type="text" id="fallaCodigo" placeholder="EJ: ERR-E15" required>
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <input type="text" id="fallaDesc" required>
+          </div>
+          <div class="form-group">
+            <label>Solución Sugerida</label>
+            <input type="text" id="fallaSolucion" required>
+          </div>
+          <div class="form-group">
+            <label>Observaciones</label>
+            <textarea id="fallaObs" rows="2"></textarea>
+          </div>
+        </div>
+        <button type="submit">Agregar Falla al Catálogo</button>
+      </form>
+    </div>
+
+    <!-- Sección Admin exclusiva: Gestión de Técnicos -->
+    <div class="card" id="cardRegistroTecnico" style="display:none; background: #FFFBEB; border-color: #F59E0B;">
+      <h2>👨‍🔧 Gestión de Técnicos de Campo</h2>
+      <form id="formTecnico">
+        <input type="hidden" id="tecId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del Técnico</label>
+            <input type="text" id="tecNombre" placeholder="Ej. Carlos Pérez" required>
+          </div>
+          <div class="form-group">
+            <label>Cédula / ID</label>
+            <input type="text" id="tecCedula" placeholder="V-12345678" required>
+          </div>
+          <div class="form-group">
+            <label>Correo Electrónico</label>
+            <input type="email" id="tecEmail" placeholder="tecnico@coquivacoa.com" required>
+          </div>
+          <div class="form-group">
+            <label>Contraseña de Acceso</label>
+            <input type="password" id="tecPassword" placeholder="••••••••" required>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" id="btnGuardarTecnico" style="background: #D97706; margin-top:0;">Registrar Técnico</button>
+          <button type="button" id="btnCancelarEdicion" onclick="limpiarFormTecnico()" style="background: #6B7280; display:none; margin-top:0;">Cancelar</button>
+        </div>
+      </form>
+
+      <h3 style="margin-top: 1.5rem; font-size: 1.1rem;">Personal Técnico Registrado</h3>
+      <table id="tablaTecnicos">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Correo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Consulta y Tabla -->
+    <div class="card">
+      <h2>3. Consulta de Equipo y Detalles</h2>
+      <div class="form-group">
+        <label>Seleccionar Equipo para Inspeccionar</label>
+        <select id="selectConsultaEquipo" onchange="mostrarDetallesEquipo()"></select>
+      </div>
+      
+      <div id="detalleArea" style="margin-top: 1rem; display: none;">
+        <h3>Ficha Técnica</h3>
+        <div id="fichaTecnica"></div>
+        
+        <!-- Botón de Edición (Solo visible para Admin) -->
+        <div id="adminAccionesEquipo" style="margin-top: 1rem; display: none;">
+          <button type="button" onclick="abrirModalEdicionEquipo()" style="background: #2563EB; width: auto; padding: 0.5rem 1rem;">✏️ Editar Información e Imagen del Equipo</button>
+        </div>
+
+        <h3 style="margin-top: 1.5rem;">Catálogo de Fallas Registradas</h3>
+        <table id="tablaFallas">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Solución Sugerida</th>
+              <th>Observaciones</th>
+            </tr>
+                <th>Acciones</th> 
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Formulario 4: Trabajo Técnico -->
+    <div class="card">
+      <h2>4. Formulario de Intervención Técnica</h2>
+      <form id="formTrabajoTecnico">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Equipo Intervenido</label>
+            <select id="selectEquipoTrabajo" onchange="cargarCodigosFallaEquipo()" required></select>
+          </div>
+          <div class="form-group">
+            <label>Fecha y Hora</label>
+            <input type="datetime-local" id="trabajoFecha" required>
+          </div>
+          <div class="form-group">
+            <label>Seleccionar Código de Falla Existente</label>
+            <select id="selectFallaCatalogo" onchange="completarDatosFalla()" required>
+              <option value="">-- Seleccione equipo primero --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Estado Final</label>
+            <select id="trabajoEstado">
+              <option value="Operativo">Operativo</option>
+              <option value="Con Falla">Operativo con Falla / Inoperativo</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Solución Aplicada / Mantenimiento Realizado</label>
+          <textarea id="trabajoSolucion" rows="3" required></textarea>
+        </div>
+        <button type="submit">Registrar Intervención Técnica</button>
+      </form>
+    </div>
+
+    <!-- Árbol de Fallas -->
+    <div class="card">
+      <h2>5. Árbol de Fallas e Historial Técnico</h2>
+      <div id="arbolFallasContenedor">
+        <p>Seleccione un equipo arriba para visualizar su árbol de fallas e historial.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal para Editar Equipo (Solo Administrador) -->
+  <div id="modalEditarEquipo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter: blur(4px); justify-content:center; align-items:center; z-index:1000;">
+    <div class="card" style="width: 100%; max-width: 500px; margin: 1rem; max-height: 90vh; overflow-y: auto;">
+      <h2>Editar Ficha del Equipo</h2>
+      <form id="formEditarEquipo">
+        <input type="hidden" id="editEqId">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>Código de Equipo</label>
+          <input type="text" id="editEqCodigo" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>Tipo</label>
+          <select id="editEqTipo">
+            <option value="Surtidor">Surtidor (Combustibles Líquidos)</option>
+            <option value="Dispensador">Dispensador</option>
+            <option value="GLP / Solgas">GLP / Gas Licuado (Solgas)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>Fabricante / Marca</label>
+          <select id="editEqMarca" required>
+            <option value="Wayne">Wayne</option>
+            <option value="Tokheim">Tokheim</option>
+            <option value="Realtech">Realtech</option>
+            <option value="Eaglestar">Eaglestar</option>
+            <option value="Solgas">Solgas</option>
+            <option value="Gilbarco">Gilbarco</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>Modelo</label>
+          <input type="text" id="editEqModelo" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>Año</label>
+          <input type="number" id="editEqAnio" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>Actualizar Imagen (Cámara / Galería)</label>
+          <input type="file" id="editEqImagenFile" accept="image/*">
+          <input type="hidden" id="editEqImagenUrl">
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="submit" style="background: #059669;">Guardar Cambios</button>
+          <button type="button" onclick="cerrarModalEdicionEquipo()" style="background: #6B7280;">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="password-toggle.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
