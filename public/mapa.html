@@ -1,376 +1,652 @@
-
-
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-    <title>Tecnoserv Táchira - Gestión de EDS (Coquivacoa C.A.)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS EDS Táchira (115 Estaciones) | Tecnoserv de Coquivacoa C.A.</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        crossorigin=""></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Google Fonts: Inter & JetBrains Mono -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-        rel="stylesheet">
-
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        petrol: {
-                            950: '#071521',
-                            900: '#0b2236',
-                            800: '#10324f',
-                            700: '#16456b',
-                            600: '#1d5b8c',
-                            500: '#2775b3',
-                        }
-                    }
-                }
-            }
+            darkMode: 'class',
+            theme: { extend: { colors: { slate: { 850: '#172033', 950: '#090d16' } } } }
         }
     </script>
+    <!-- Leaflet & Cluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .leaflet-container {
-            font-family: 'Inter', sans-serif;
-            z-index: 10;
-        }
-
-        .leaflet-popup-content-wrapper {
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .leaflet-popup-content {
-            margin: 0;
-            width: 290px !important;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 9999px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
-        }
-
-        .map-picking-cursor .leaflet-container {
-            cursor: crosshair !important;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        #map { height: 100%; min-height: 450px; width: 100%; z-index: 10; }
+        .leaflet-popup-content-wrapper { background: #0f172a !important; color: #f8fafc !important; border-radius: 0.75rem !important; border: 1px solid #334155 !important; }
+        .leaflet-popup-tip { background: #0f172a !important; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-[9999] hidden transition-all duration-300 transform translate-y-4 opacity-0">
+        <div class="bg-slate-900 border border-amber-500/60 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-medium">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+            <span id="toast-message">Operación exitosa</span>
+        </div>
+    </div>
 
-    <!-- Top Header Industrial -->
-    <header class="bg-petrol-900 text-white border-b border-petrol-700 shadow-lg sticky top-0 z-30">
-        <div class="max-w-[1600px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-petrol-950 shadow-md">
-                    <i class="fa-solid fa-gas-pump text-xl"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">TECNOSERV TÁCHIRA</h1>
-                        <span
-                            class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-petrol-700 text-amber-400 border border-petrol-600 rounded-md">
-                            Coquivacoa C.A.
-                        </span>
+    <!-- Header -->
+    <header class="bg-slate-900/95 backdrop-blur border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-bold shadow-md shadow-amber-500/20">
+                        <i class="fa-solid fa-gas-pump"></i>
                     </div>
-                    <p class="text-xs text-slate-300">Sistema Integral de Control Técnico y Georreferenciación de EDS
-                        (29 Municipios)</p>
+                    <div>
+                        <h1 class="text-sm sm:text-base font-extrabold text-white">Tecnoserv de Coquivacoa C.A.</h1>
+                        <p class="text-[11px] text-slate-400">Red GIS 115 EDS PDVSA — Estado Táchira</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="openNewStationModal()"
-                    class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-lg shadow transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Nueva EDS
-                </button>
-                <div class="relative inline-block"
-                    id="exportDropdownWrapper">
-                    <button onclick="toggleExportMenu()"
-                        class="bg-petrol-700 hover:bg-petrol-600 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg border border-petrol-600 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-download"></i> Exportar <i
-                            class="fa-solid fa-chevron-down text-[10px]"></i>
-                    </button>
-                    <div id="exportMenu"
-                        class="hidden absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 text-slate-700">
-                        <button onclick="exportData('json')"
-                            class="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-100 flex items-center gap-2">
-                            <i class="fa-solid fa-file-code text-amber-600 w-4"></i> Respaldo JSON Completo
-                        </button>
-                        <button onclick="exportData('csv')"
-                            class="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-100 flex items-center gap-2">
-                            <i class="fa-solid fa-file-csv text-emerald-600 w-4"></i> Tabla Excel / CSV
-                        </button>
-                    </div>
+            <!-- KPIs & Actions -->
+            <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-between lg:justify-end text-xs">
+                <div class="flex items-center gap-1.5">
+                    <button onclick="filterStatus('')" class="bg-slate-850 border border-slate-700 px-2.5 py-1.5 rounded-lg">Total: <strong id="kpi-total" class="text-white">0</strong></button>
+                    <button onclick="filterStatus('Operativa')" class="bg-emerald-950/70 border border-emerald-700/70 text-emerald-300 px-2.5 py-1.5 rounded-lg">Operativas: <strong id="kpi-op" class="text-white">0</strong></button>
+                    <button onclick="filterStatus('En Reparación')" class="bg-amber-950/70 border border-amber-700/70 text-amber-300 px-2.5 py-1.5 rounded-lg">Reparación: <strong id="kpi-rep" class="text-white">0</strong></button>
+                    <button onclick="filterStatus('Cerrada')" class="bg-rose-950/70 border border-rose-700/70 text-rose-300 px-2.5 py-1.5 rounded-lg">Cerradas: <strong id="kpi-cer" class="text-white">0</strong></button>
                 </div>
-                <label
-                    class="bg-petrol-700 hover:bg-petrol-600 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg border border-petrol-600 transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-upload"></i> Importar JSON
-                    <input type="file"
-                        id="importJsonInput"
-                        accept=".json"
-                        class="hidden"
-                        onchange="importJSON(event)">
-                </label>
-                <button onclick="confirmResetDatabase()"
-                    title="Restaurar base de datos original"
-                    class="bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-rotate-left"></i> <span class="hidden md:inline">Restaurar</span>
-                </button>
+                <div class="flex items-center gap-1.5 ml-auto">
+                    <button onclick="openModal(null)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> Nueva EDS</button>
+                    <button onclick="openExport()" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1"><i class="fa-solid fa-database"></i> MongoDB</button>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Banner Alerta Captura de Coordenadas -->
-    <div id="pickingBanner"
-        class="hidden bg-amber-500 text-petrol-950 px-4 py-2.5 text-center text-sm font-bold shadow-md flex items-center justify-center gap-4 sticky top-[68px] z-30">
-        <span><i class="fa-solid fa-crosshairs fa-spin mr-1.5"></i> MODO CAPTURA GPS ACTIVO: Haz clic en cualquier punto
-            del mapa para asignar las coordenadas a la EDS.</span>
-        <button onclick="cancelMapPicking()"
-            class="bg-petrol-900 text-white text-xs px-3 py-1 rounded-md hover:bg-petrol-800">Cancelar</button>
+    <!-- Map Pick Banner -->
+    <div id="pick-banner" class="hidden bg-amber-500 text-slate-950 py-2 text-xs font-bold text-center z-30 flex items-center justify-center gap-3">
+        <span><i class="fa-solid fa-crosshairs fa-spin mr-1"></i> Haz clic en el mapa para asignar las coordenadas exactas de la EDS.</span>
+        <button onclick="cancelPick()" class="bg-slate-950 text-white px-2 py-0.5 rounded text-[10px]">Cancelar</button>
     </div>
 
-    <!-- Main Container -->
-    <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 py-4 space-y-4">
-
-        <!-- KPIs Cards -->
-        <section class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Total EDS Táchira</p>
-                    <p id="kpiTotal"
-                        class="text-2xl font-extrabold text-petrol-900 mt-0.5">0</p>
-                </div>
-                <div
-                    class="w-10 h-10 rounded-lg bg-petrol-900/10 text-petrol-800 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-layer-group"></i>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-emerald-600 uppercase">Operativas</p>
-                    <p id="kpiOperativas"
-                        class="text-2xl font-extrabold text-emerald-700 mt-0.5">0</p>
-                </div>
-                <div
-                    class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-amber-600 uppercase">En Mantenimiento</p>
-                    <p id="kpiMantenimiento"
-                        class="text-2xl font-extrabold text-amber-600 mt-0.5">0</p>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-screwdriver-wrench"></i>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Inactivas</p>
-                    <p id="kpiInactivas"
-                        class="text-2xl font-extrabold text-slate-700 mt-0.5">0</p>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-power-off"></i>
-                </div>
-            </div>
-            <div
-                class="col-span-2 lg:col-span-1 bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-rose-600 uppercase">Cerradas Fiscalía/Min.</p>
-                    <p id="kpiCerradas"
-                        class="text-2xl font-extrabold text-rose-700 mt-0.5">0</p>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-ban"></i>
-                </div>
-            </div>
-        </section>
-
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 flex flex-col gap-3">
         <!-- Filters Bar -->
-        <section class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-                <div class="lg:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Buscar por Nombre o Código
-                        SAP/PDVSA</label>
-                    <div class="relative">
-                        <i
-                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text"
-                            id="searchInput"
-                            oninput="applyFilters()"
-                            placeholder="Ej. 505495, Marginal, Caneyes, Ureña..."
-                            class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-petrol-600">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Municipio (29 Municipios)</label>
-                    <select id="municipalityFilter"
-                        onchange="applyFilters()"
-                        class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-petrol-600">
-                        <option value="ALL">Todos los Municipios</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Estado Operativo</label>
-                    <select id="statusFilter"
-                        onchange="applyFilters()"
-                        class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-petrol-600">
-                        <option value="ALL">Todos los Estados</option>
-                        <option value="Operativa">Operativa</option>
-                        <option value="En Mantenimiento">En Mantenimiento</option>
-                        <option value="Inactiva">Inactiva</option>
-                        <option value="Cerrada por Fiscalía / MinPetróleo">Cerrada por Fiscalía / MinPetróleo</option>
-                    </select>
-                </div>
-                <div class="flex gap-2">
-                    <div class="flex-1">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Combustible</label>
-                        <select id="fuelFilter"
-                            onchange="applyFilters()"
-                            class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-petrol-600">
-                            <option value="ALL">Todos</option>
-                            <option value="Gasolina 95">Gasolina 95</option>
-                            <option value="Gasolina 91">Gasolina 91</option>
-                            <option value="Diésel">Diésel</option>
-                        </select>
-                    </div>
-                    <button onclick="resetFilters()"
-                        title="Limpiar filtros"
-                        class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition self-end">
-                        <i class="fa-solid fa-filter-circle-xmark"></i>
-                    </button>
-                </div>
+        <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2 text-xs">
+            <div class="md:col-span-4 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
+                <input type="text" id="search" placeholder="Buscar SAP, EDS, técnico..." class="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-amber-500">
             </div>
-        </section>
+            <div class="md:col-span-3">
+                <select id="munFilter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500"><option value="">Todos los Municipios</option></select>
+            </div>
+            <div class="md:col-span-2">
+                <select id="axisFilter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                    <option value="">Todos los Ejes</option>
+                    <option value="Metropolitano">Metropolitano</option>
+                    <option value="Fronterizo">Fronterizo</option>
+                    <option value="Panamericano y Norte">Panamericano y Norte</option>
+                    <option value="Montaña">Montaña</option>
+                    <option value="Sur y Llanos">Sur y Llanos</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <select id="statusFilter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                    <option value="">Todos los Estatus</option>
+                    <option value="Operativa">Operativa</option>
+                    <option value="En Reparación">En Reparación</option>
+                    <option value="Cerrada">Cerrada</option>
+                </select>
+            </div>
+            <div class="md:col-span-1">
+                <button onclick="resetFilters()" class="w-full bg-slate-800 hover:bg-slate-700 py-1.5 rounded-xl text-slate-300 font-medium transition" title="Limpiar"><i class="fa-solid fa-rotate-left"></i></button>
+            </div>
+        </div>
 
-        <!-- Map Section -->
-        <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div
-                class="bg-slate-50 px-4 py-2.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-map-location-dot text-petrol-700"></i>
-                    <h2 class="text-sm font-bold text-slate-800">Mapa Georreferenciado de Estaciones de Servicio -
-                        Estado Táchira</h2>
-                    <span id="filteredBadge"
-                        class="text-xs bg-petrol-900 text-white px-2 py-0.5 rounded-full font-semibold">0
-                        mostradas</span>
+        <!-- Split Map + Table -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1">
+            <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[450px] lg:h-[650px] relative">
+                <div class="bg-slate-850 px-3 py-2 border-b border-slate-800 flex justify-between items-center text-xs">
+                    <span class="font-bold text-white"><i class="fa-solid fa-map text-amber-500 mr-1"></i> Mapa Táchira GIS</span>
+                    <button onclick="toggleCluster()" id="btn-cluster" class="text-[11px] bg-slate-800 text-amber-400 px-2 py-1 rounded">Agrupar: ON</button>
                 </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs font-medium">
-                    <span class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-emerald-500 inline-block border border-white shadow"></span>
-                        Operativa</span>
-                    <span class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-amber-500 inline-block border border-white shadow"></span>
-                        Mantenimiento</span>
-                    <span class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-slate-500 inline-block border border-white shadow"></span>
-                        Inactiva</span>
-                    <span class="flex items-center gap-1.5"><span
-                            class="w-3 h-3 rounded-full bg-rose-600 inline-block border border-white shadow"></span>
-                        Cerrada Fiscalía</span>
-                    <button onclick="fitMapBounds()"
-                        class="ml-2 text-petrol-700 hover:text-petrol-900 underline font-semibold">
-                        Centrar Táchira
-                    </button>
-                </div>
+                <div id="map" class="flex-1"></div>
             </div>
-            <div id="map"
-                class="w-full h-[430px] sm:h-[490px]"></div>
-        </section>
 
-        <!-- Synchronized Table Section -->
-        <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div
-                class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-table-list text-petrol-700"></i>
-                    <h2 class="text-sm font-bold text-slate-800">Catálogo Técnico Sincronizado (Coquivacoa C.A.)</h2>
+            <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[500px] lg:h-[650px]">
+                <div class="bg-slate-850 px-3 py-2 border-b border-slate-800 flex justify-between items-center text-xs">
+                    <span class="font-bold text-white"><i class="fa-solid fa-table-list text-amber-500 mr-1"></i> Inventario Editable (<span id="count" class="text-amber-400">0</span> EDS)</span>
+                    <button onclick="restoreDefault()" class="text-[11px] text-slate-400 hover:text-rose-400"><i class="fa-solid fa-clock-rotate-left"></i> Restaurar</button>
                 </div>
-                <p class="text-xs text-slate-500">Haz clic en cualquier fila para ubicar en el mapa o presiona
-                    <strong>Intervención</strong> para editar.
-                </p>
+                <div class="overflow-auto flex-1">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950 sticky top-0 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                            <tr>
+                                <th class="p-2.5">SAP</th>
+                                <th class="p-2.5">Estación / Municipio</th>
+                                <th class="p-2.5">Estatus</th>
+                                <th class="p-2.5">Equipos / Notas</th>
+                                <th class="p-2.5 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-800 text-slate-300"></tbody>
+                    </table>
+                </div>
             </div>
-            <div class="overflow-x-auto custom-scrollbar max-h-[520px]">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead class="bg-petrol-900 text-white text-xs uppercase sticky top-0 z-20">
-                        <tr>
-                            <th class="py-3 px-3 font-semibold">Código SAP</th>
-                            <th class="py-3 px-3 font-semibold">Estación de Servicio</th>
-                            <th class="py-3 px-3 font-semibold">Municipio</th>
-                            <th class="py-3 px-3 font-semibold">Estado Operativo</th>
-                            <th class="py-3 px-3 font-semibold">Combustibles</th>
-                            <th class="py-3 px-3 font-semibold">Dispensador / Mangueras</th>
-                            <th class="py-3 px-3 font-semibold">Últ. Intervención Técnica</th>
-                            <th class="py-3 px-3 font-semibold">Coordenadas</th>
-                            <th class="py-3 px-3 font-semibold text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stationsTableBody"
-                        class="divide-y divide-slate-200 text-xs sm:text-sm">
-                        <!-- Filas generadas dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
+        </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-petrol-950 text-slate-400 text-xs py-3 px-4 border-t border-petrol-800 mt-6">
-        <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2">
-            <span><strong>TECNOSERV TÁCHIRA</strong> &bull; Plataforma de Gestión y Mantenimiento de Estaciones de
-                Servicio &bull; <strong>Coquivacoa C.A.</strong></span>
-            <span>Almacenamiento local automático activo (<code class="text-amber-400">localStorage</code>)</span>
+    <!-- Modal Edit/Create -->
+    <div id="editModal" class="fixed inset-0 z-[5000] hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-3 text-xs shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 id="modalTitle" class="font-bold text-sm text-white">Editar EDS</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <form id="edsForm" class="space-y-3">
+                <input type="hidden" id="origSap">
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-slate-400 mb-1">SAP *</label>
+                        <input type="text" id="fSap" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-amber-400 font-mono font-bold">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-slate-400 mb-1">Nombre *</label>
+                        <input type="text" id="fName" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Estatus *</label>
+                        <select id="fStatus" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold">
+                            <option value="Operativa">Operativa</option>
+                            <option value="En Reparación">En Reparación</option>
+                            <option value="Cerrada">Cerrada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Municipio *</label>
+                        <select id="fMun" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"></select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Eje *</label>
+                        <select id="fAxis" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                            <option value="Metropolitano">Metropolitano</option>
+                            <option value="Fronterizo">Fronterizo</option>
+                            <option value="Panamericano y Norte">Panamericano y Norte</option>
+                            <option value="Montaña">Montaña</option>
+                            <option value="Sur y Llanos">Sur y Llanos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Surtidores</label>
+                        <input type="text" id="fDisp" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Técnico</label>
+                        <input type="text" id="fTech" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200">
+                    </div>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-300">Coordenadas GPS</span>
+                        <button type="button" onclick="startPick()" class="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-semibold"><i class="fa-solid fa-map-pin"></i> Capturar en Mapa</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" step="any" id="fLat" required placeholder="Lat" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-slate-200">
+                        <input type="number" step="any" id="fLng" required placeholder="Lng" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-slate-200">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Diagnóstico / Notas</label>
+                    <textarea id="fNotes" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200"></textarea>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+                    <button type="button" id="btnDel" onclick="deleteEds()" class="bg-rose-950 text-rose-300 px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeModal()" class="bg-slate-800 px-3 py-1.5 rounded-lg text-slate-300">Cancelar</button>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-lg">Guardar</button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </footer>
+    </div>
 
-    <!-- Modal de Edición Técnica / Nueva EDS -->
-    <div id="stationModal"
-        class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-3xl w-full overflow-hidden my-auto">
-            <!-- Modal Header -->
-            <div class="bg-petrol-900 text-white px-5 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-9 h-9 rounded-lg bg-amber-500 text-petrol-950 flex items-center justify-center font-bo
+    <!-- Modal Export MongoDB -->
+    <div id="exportModal" class="fixed inset-0 z-[5000] hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 space-y-3 text-xs shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="font-bold text-sm text-white">MongoDB Atlas & VSCodroid Export</h3>
+                <button onclick="closeExport()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="downloadJson()" class="bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl flex items-center gap-1.5"><i class="fa-solid fa-download"></i> Descargar .json</button>
+                <button onclick="copyJson()" class="bg-slate-800 text-amber-400 border border-slate-700 font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5"><i class="fa-solid fa-copy"></i> Copiar JSON</button>
+            </div>
+            <textarea id="jsonPreview" readonly rows="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-emerald-400"></textarea>
+        </div>
+    </div>
+
+    <!-- Leaflet JS & Cluster -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <script>
+        const MUNICIPALITIES = [
+            "Andrés Bello", "Antonio Rómulo Costa", "Ayacucho", "Bolívar", "Cárdenas",
+            "Córdoba", "Fernández Feo", "Francisco de Miranda", "García de Hevia", "Guásimos",
+            "Independencia", "Jáuregui", "José María Vargas", "Junín", "Libertad",
+            "Libertador", "Lobatera", "Michelena", "Panamericano", "Pedro María Ureña",
+            "Rafael Urdaneta", "Samuel Darío Maldonado", "San Cristóbal", "San Judas Tadeo",
+            "Seboruco", "Simón Rodríguez", "Sucre", "Torbes", "Uribante"
+        ];
+
+        const BASE_STATIONS = [
+            { sapCode: "1004201", name: "EDS La Concordia", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7554, lng: -72.2312, dispensers: "6 Realtech", technician: "Ing. Carlos Méndez", notes: "Alto flujo urbano." },
+            { sapCode: "1004202", name: "EDS Los Agustinos", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7789, lng: -72.2245, dispensers: "4 Gilbarco", technician: "Téc. Luis Zambrano", notes: "Despacho dual." },
+            { sapCode: "1004203", name: "EDS Barrio Obrero", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7682, lng: -72.2185, dispensers: "4 Wayne", technician: "Ing. Carlos Méndez", notes: "Modalidad internacional." },
+            { sapCode: "1004204", name: "EDS Las Lomas", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7725, lng: -72.2340, dispensers: "4 Realtech", technician: "Téc. Jorge Pernía", notes: "Alta rotación." },
+            { sapCode: "1004205", name: "EDS Madre Juana", municipality: "San Cristóbal", axis: "Metropolitano", status: "En Reparación", lat: 7.7510, lng: -72.2415, dispensers: "4 Tokheim", technician: "Ing. Carlos Méndez", notes: "Tanques subterráneos." },
+            { sapCode: "1004206", name: "EDS Pueblo Nuevo", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7895, lng: -72.2015, dispensers: "4 Gilbarco", technician: "Téc. Luis Zambrano", notes: "Polideportivo." },
+            { sapCode: "1004207", name: "EDS Pirineos I", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7740, lng: -72.2080, dispensers: "4 Realtech", technician: "Téc. Jorge Pernía", notes: "Biopago activo." },
+            { sapCode: "1004208", name: "EDS Pirineos II", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7815, lng: -72.2095, dispensers: "3 Wayne", technician: "Téc. Jorge Pernía", notes: "Av. España." },
+            { sapCode: "1004209", name: "EDS La Ermita", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7645, lng: -72.2360, dispensers: "3 Gilbarco", technician: "Téc. Luis Zambrano", notes: "Filtros de línea." },
+            { sapCode: "1004210", name: "EDS El Mirador", municipality: "San Cristóbal", axis: "Metropolitano", status: "Cerrada", lat: 7.7760, lng: -72.2485, dispensers: "3 Wayne", technician: "Ing. Carlos Méndez", notes: "Prueba de hermeticidad." },
+            { sapCode: "1004211", name: "EDS Paramillo Industrial", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.8012, lng: -72.2150, dispensers: "6 Realtech", technician: "Ing. Carlos Méndez", notes: "Diésel carga pesada." },
+            { sapCode: "1004212", name: "EDS Sabana Larga", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7430, lng: -72.2290, dispensers: "4 Realtech", technician: "Téc. Marco Contreras", notes: "Salida sur." },
+            { sapCode: "1004213", name: "EDS Santa Teresa", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7618, lng: -72.2230, dispensers: "3 Gilbarco", technician: "Téc. Luis Zambrano", notes: "Centro ciudad." },
+            { sapCode: "1004214", name: "EDS Quinta Avenida", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7660, lng: -72.2285, dispensers: "4 Wayne", technician: "Téc. Luis Zambrano", notes: "Displays activos." },
+            { sapCode: "1004215", name: "EDS Séptima Avenida", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7695, lng: -72.2260, dispensers: "3 Realtech", technician: "Téc. Jorge Pernía", notes: "Calibrada." },
+            { sapCode: "1004216", name: "EDS Barrio Sucre", municipality: "San Cristóbal", axis: "Metropolitano", status: "En Reparación", lat: 7.7765, lng: -72.2155, dispensers: "3 Tokheim", technician: "Téc. Marco Contreras", notes: "Fuente poder." },
+            { sapCode: "1004217", name: "EDS Las Acacias", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7732, lng: -72.2198, dispensers: "4 Gilbarco", technician: "Ing. Carlos Méndez", notes: "Sin novedad." },
+            { sapCode: "1004218", name: "EDS Unidad Vecinal", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7590, lng: -72.2380, dispensers: "4 Realtech", technician: "Téc. Marco Contreras", notes: "Shear valves." },
+            { sapCode: "1004219", name: "EDS Puente Real", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7485, lng: -72.2345, dispensers: "4 Realtech", technician: "Téc. Marco Contreras", notes: "Sumideros limpios." },
+            { sapCode: "1004220", name: "EDS San Carlos", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7535, lng: -72.2215, dispensers: "3 Wayne", technician: "Téc. Luis Zambrano", notes: "Mangueras." },
+            { sapCode: "1004221", name: "EDS La Guacara", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7625, lng: -72.2160, dispensers: "3 Gilbarco", technician: "Téc. Jorge Pernía", notes: "Telemetría." },
+            { sapCode: "1004222", name: "EDS Los Kioscos", municipality: "San Cristóbal", axis: "Metropolitano", status: "Cerrada", lat: 7.7845, lng: -72.2190, dispensers: "2 Wayne", technician: "Ing. Carlos Méndez", notes: "Espera concesionario." },
+            { sapCode: "1004223", name: "EDS El Terminal", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7495, lng: -72.2275, dispensers: "6 Realtech", technician: "Ing. Carlos Méndez", notes: "Transporte interurbano." },
+            { sapCode: "1004224", name: "EDS La Castra", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7570, lng: -72.2120, dispensers: "3 Realtech", technician: "Téc. Marco Contreras", notes: "Filtros nuevos." },
+            { sapCode: "1004225", name: "EDS Zorca San Isidro", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7880, lng: -72.2560, dispensers: "3 Gilbarco", technician: "Téc. Jorge Pernía", notes: "Vía Capacho." },
+            { sapCode: "1004226", name: "EDS Chorro El Indio", municipality: "San Cristóbal", axis: "Metropolitano", status: "Operativa", lat: 7.7690, lng: -72.1950, dispensers: "2 Realtech", technician: "Téc. Luis Zambrano", notes: "Tablero fuerza." },
+            // Cárdenas
+            { sapCode: "1004227", name: "EDS Táriba Centro", municipality: "Cárdenas", axis: "Metropolitano", status: "Operativa", lat: 7.8185, lng: -72.2235, dispensers: "4 Realtech", technician: "Téc. Pedro Roa", notes: "Mantenimiento mensual." },
+            { sapCode: "1004228", name: "EDS Las Vegas de Táriba", municipality: "Cárdenas", axis: "Metropolitano", status: "Operativa", lat: 7.8095, lng: -72.2190, dispensers: "4 Gilbarco", technician: "Téc. Pedro Roa", notes: "Autopista." },
+            { sapCode: "1004229", name: "EDS Arjona", municipality: "Cárdenas", axis: "Metropolitano", status: "En Reparación", lat: 7.8260, lng: -72.2140, dispensers: "4 Wayne", technician: "Téc. Pedro Roa", notes: "Tuberías impulsión." },
+            { sapCode: "1004230", name: "EDS Barrancas", municipality: "Cárdenas", axis: "Metropolitano", status: "Operativa", lat: 7.8040, lng: -72.2240, dispensers: "4 Realtech", technician: "Téc. Pedro Roa", notes: "Veeder-Root." },
+            { sapCode: "1004231", name: "EDS Tucapé", municipality: "Cárdenas", axis: "Metropolitano", status: "Operativa", lat: 7.8130, lng: -72.2290, dispensers: "3 Gilbarco", technician: "Téc. Pedro Roa", notes: "Operación continua." },
+            { sapCode: "1004232", name: "EDS Sabaneta", municipality: "Cárdenas", axis: "Metropolitano", status: "Operativa", lat: 7.8215, lng: -72.2310, dispensers: "3 Realtech", technician: "Téc. Pedro Roa", notes: "Metrología ok." },
+            { sapCode: "1004233", name: "EDS Caneyes", municipality: "Cárdenas", axis: "Metropolitano", status: "Operativa", lat: 7.8325, lng: -72.2380, dispensers: "4 Realtech", technician: "Téc. Pedro Roa", notes: "Vía Palmira." },
+            { sapCode: "1004234", name: "EDS Palo Gordo", municipality: "Cárdenas", axis: "Metropolitano", status: "Cerrada", lat: 7.8390, lng: -72.2110, dispensers: "2 Tokheim", technician: "Téc. Pedro Roa", notes: "Sistema eléctrico." },
+            // Guásimos
+            { sapCode: "1004235", name: "EDS Palmira Centro", municipality: "Guásimos", axis: "Metropolitano", status: "Operativa", lat: 7.8420, lng: -72.2310, dispensers: "4 Realtech", technician: "Téc. Pedro Roa", notes: "Bombas sumergibles." },
+            { sapCode: "1004236", name: "EDS Patiecitos", municipality: "Guásimos", axis: "Metropolitano", status: "Operativa", lat: 7.8550, lng: -72.2360, dispensers: "3 Gilbarco", technician: "Téc. Pedro Roa", notes: "Agrícola." },
+            { sapCode: "1004237", name: "EDS Toiquito", municipality: "Guásimos", axis: "Metropolitano", status: "Operativa", lat: 7.8485, lng: -72.2450, dispensers: "2 Wayne", technician: "Téc. Pedro Roa", notes: "Estable." },
+            // Andrés Bello
+            { sapCode: "1004238", name: "EDS Cordero Principal", municipality: "Andrés Bello", axis: "Metropolitano", status: "Operativa", lat: 7.8540, lng: -72.1815, dispensers: "4 Realtech", technician: "Téc. Héctor Mora", notes: "Trasandina." },
+            { sapCode: "1004239", name: "EDS Salomón", municipality: "Andrés Bello", axis: "Metropolitano", status: "Operativa", lat: 7.8680, lng: -72.1720, dispensers: "3 Gilbarco", technician: "Téc. Héctor Mora", notes: "Bocas descarga." },
+            { sapCode: "1004240", name: "EDS Monte Carmelo", municipality: "Andrés Bello", axis: "Metropolitano", status: "En Reparación", lat: 7.8460, lng: -72.1920, dispensers: "2 Wayne", technician: "Téc. Héctor Mora", notes: "Luminarias LED." },
+            // Torbes
+            { sapCode: "1004241", name: "EDS San Josecito", municipality: "Torbes", axis: "Metropolitano", status: "Operativa", lat: 7.6690, lng: -72.2180, dispensers: "4 Realtech", technician: "Téc. Marco Contreras", notes: "Troncal 5." },
+            { sapCode: "1004242", name: "EDS El Corozo", municipality: "Torbes", axis: "Metropolitano", status: "Operativa", lat: 7.7020, lng: -72.2210, dispensers: "4 Gilbarco", technician: "Téc. Marco Contreras", notes: "Control vial." },
+            { sapCode: "1004243", name: "EDS Vega de Aza", municipality: "Torbes", axis: "Metropolitano", status: "Operativa", lat: 7.6480, lng: -72.2090, dispensers: "4 Realtech", technician: "Téc. Marco Contreras", notes: "Diésel continuo." },
+            { sapCode: "1004244", name: "EDS Agua Dulce", municipality: "Torbes", axis: "Metropolitano", status: "Cerrada", lat: 7.6850, lng: -72.2150, dispensers: "2 Tokheim", technician: "Téc. Marco Contreras", notes: "Bomba sumergible." },
+            // Bolívar
+            { sapCode: "1004245", name: "EDS San Antonio Centro", municipality: "Bolívar", axis: "Fronterizo", status: "Operativa", lat: 7.8145, lng: -72.4430, dispensers: "6 Realtech", technician: "Ing. Rafael Vivas", notes: "Fronteriza." },
+            { sapCode: "1004246", name: "EDS La Aduana", municipality: "Bolívar", axis: "Fronterizo", status: "Operativa", lat: 7.8190, lng: -72.4495, dispensers: "6 Gilbarco", technician: "Ing. Rafael Vivas", notes: "Alto caudal." },
+            { sapCode: "1004247", name: "EDS El Recreo", municipality: "Bolívar", axis: "Fronterizo", status: "Cerrada", lat: 7.8050, lng: -72.4380, dispensers: "4 Wayne", technician: "Ing. Rafael Vivas", notes: "Seguridad industrial." },
+            { sapCode: "1004248", name: "EDS Cayetano Redondo", municipality: "Bolívar", axis: "Fronterizo", status: "Operativa", lat: 7.8110, lng: -72.4390, dispensers: "4 Realtech", technician: "Ing. Rafael Vivas", notes: "Impresoras fiscales." },
+            { sapCode: "1004249", name: "EDS Miranda Frontera", municipality: "Bolívar", axis: "Fronterizo", status: "Operativa", lat: 7.8165, lng: -72.4460, dispensers: "4 Realtech", technician: "Ing. Rafael Vivas", notes: "Internacional." },
+            { sapCode: "1004250", name: "EDS Llano Jorge", municipality: "Bolívar", axis: "Fronterizo", status: "En Reparación", lat: 7.8340, lng: -72.4360, dispensers: "4 Gilbarco", technician: "Ing. Rafael Vivas", notes: "Tarjeta CPU." },
+            { sapCode: "1004251", name: "EDS Palotal", municipality: "Bolívar", axis: "Fronterizo", status: "Operativa", lat: 7.8520, lng: -72.4340, dispensers: "4 Realtech", technician: "Ing. Rafael Vivas", notes: "Flujo constante." },
+            { sapCode: "1004252", name: "EDS El Cují", municipality: "Bolívar", axis: "Fronterizo", status: "Operativa", lat: 7.7980, lng: -72.4290, dispensers: "3 Wayne", technician: "Ing. Rafael Vivas", notes: "Vía Rubio." },
+            // Ureña
+            { sapCode: "1004253", name: "EDS Ureña La Integración", municipality: "Pedro María Ureña", axis: "Fronterizo", status: "Operativa", lat: 7.9165, lng: -72.4480, dispensers: "6 Realtech", technician: "Ing. Rafael Vivas", notes: "Puente Santander." },
+            { sapCode: "1004254", name: "EDS Aguas Calientes", municipality: "Pedro María Ureña", axis: "Fronterizo", status: "Operativa", lat: 7.8890, lng: -72.4350, dispensers: "4 Gilbarco", technician: "Ing. Rafael Vivas", notes: "Zona industrial." },
+            { sapCode: "1004255", name: "EDS Zona Industrial Ureña", municipality: "Pedro María Ureña", axis: "Fronterizo", status: "Operativa", lat: 7.9050, lng: -72.4410, dispensers: "6 Realtech", technician: "Ing. Rafael Vivas", notes: "Carga binacional." },
+            { sapCode: "1004256", name: "EDS El Vallado", municipality: "Pedro María Ureña", axis: "Fronterizo", status: "En Reparación", lat: 7.9210, lng: -72.4430, dispensers: "3 Wayne", technician: "Ing. Rafael Vivas", notes: "Sello mecánico." },
+            { sapCode: "1004257", name: "EDS La Mulata", municipality: "Pedro María Ureña", axis: "Fronterizo", status: "Operativa", lat: 7.8780, lng: -72.4210, dispensers: "4 Realtech", technician: "Ing. Rafael Vivas", notes: "Telemetría." },
+            { sapCode: "1004258", name: "EDS Nueva Arcadia", municipality: "Pedro María Ureña", axis: "Fronterizo", status: "Operativa", lat: 7.9320, lng: -72.4380, dispensers: "3 Gilbarco", technician: "Ing. Rafael Vivas", notes: "Estable." },
+            // Junín
+            { sapCode: "1004259", name: "EDS Rubio Centro", municipality: "Junín", axis: "Fronterizo", status: "Operativa", lat: 7.7055, lng: -72.3560, dispensers: "4 Realtech", technician: "Téc. Óscar Chacón", notes: "Principal Rubio." },
+            { sapCode: "1004260", name: "EDS La Palmita", municipality: "Junín", axis: "Fronterizo", status: "En Reparación", lat: 7.7210, lng: -72.3410, dispensers: "4 Gilbarco", technician: "Téc. Óscar Chacón", notes: "Sistema antiexplosivo." },
+            { sapCode: "1004261", name: "EDS Bramón", municipality: "Junín", axis: "Fronterizo", status: "Operativa", lat: 7.6740, lng: -72.3920, dispensers: "3 Wayne", technician: "Téc. Óscar Chacón", notes: "Cafetalera." },
+            { sapCode: "1004262", name: "EDS El Rodeo", municipality: "Junín", axis: "Fronterizo", status: "Operativa", lat: 7.7120, lng: -72.3640, dispensers: "4 Realtech", technician: "Téc. Óscar Chacón", notes: "Calibrada." },
+            { sapCode: "1004263", name: "EDS La Petrolia", municipality: "Junín", axis: "Fronterizo", status: "Operativa", lat: 7.7350, lng: -72.3280, dispensers: "2 Gilbarco", technician: "Téc. Óscar Chacón", notes: "Histórica." },
+            { sapCode: "1004264", name: "EDS San Diego de Junín", municipality: "Junín", axis: "Fronterizo", status: "Cerrada", lat: 7.6980, lng: -72.3510, dispensers: "2 Tokheim", technician: "Téc. Óscar Chacón", notes: "Dispensadores obsoletos." },
+            // Libertad & Independencia
+            { sapCode: "1004265", name: "EDS Capacho Viejo Principal", municipality: "Libertad", axis: "Fronterizo", status: "Operativa", lat: 7.8240, lng: -72.3085, dispensers: "4 Realtech", technician: "Téc. Óscar Chacón", notes: "Eje San Cristóbal." },
+            { sapCode: "1004266", name: "EDS Cipriano Castro", municipality: "Libertad", axis: "Fronterizo", status: "Operativa", lat: 7.8190, lng: -72.3160, dispensers: "3 Gilbarco", technician: "Téc. Óscar Chacón", notes: "Breakaway." },
+            { sapCode: "1004267", name: "EDS Capacho Nuevo Centro", municipality: "Independencia", axis: "Fronterizo", status: "Operativa", lat: 7.8295, lng: -72.3040, dispensers: "4 Realtech", technician: "Téc. Óscar Chacón", notes: "Filtros separadores." },
+            { sapCode: "1004268", name: "EDS El Valle Capacho", municipality: "Independencia", axis: "Fronterizo", status: "Operativa", lat: 7.8350, lng: -72.2950, dispensers: "3 Wayne", technician: "Téc. Óscar Chacón", notes: "Sin novedad." },
+            { sapCode: "1004269", name: "EDS Peribeca", municipality: "Independencia", axis: "Fronterizo", status: "En Reparación", lat: 7.8080, lng: -72.2880, dispensers: "2 Gilbarco", technician: "Téc. Óscar Chacón", notes: "Telemetría." },
+            // Ayacucho
+            { sapCode: "1004270", name: "EDS Colón Centro", municipality: "Ayacucho", axis: "Panamericano y Norte", status: "Operativa", lat: 8.0345, lng: -72.2590, dispensers: "4 Realtech", technician: "Ing. Javier Duarte", notes: "Panamericana." },
+            { sapCode: "1004271", name: "EDS San Félix", municipality: "Ayacucho", axis: "Panamericano y Norte", status: "Operativa", lat: 8.1120, lng: -72.2680, dispensers: "4 Gilbarco", technician: "Ing. Javier Duarte", notes: "Agrícola." },
+            { sapCode: "1004272", name: "EDS San Pedro del Río", municipality: "Ayacucho", axis: "Panamericano y Norte", status: "Operativa", lat: 7.9890, lng: -72.2850, dispensers: "2 Realtech", technician: "Ing. Javier Duarte", notes: "Turístico." },
+            { sapCode: "1004273", name: "EDS La Popa Colón", municipality: "Ayacucho", axis: "Panamericano y Norte", status: "Operativa", lat: 8.0420, lng: -72.2540, dispensers: "4 Wayne", technician: "Ing. Javier Duarte", notes: "Bombas sumergibles." },
+            { sapCode: "1004274", name: "EDS Las Flores Panamericana", municipality: "Ayacucho", axis: "Panamericano y Norte", status: "Cerrada", lat: 8.0750, lng: -72.2630, dispensers: "3 Tokheim", technician: "Ing. Javier Duarte", notes: "Filtración tanquilla." },
+            // García de Hevia
+            { sapCode: "1004275", name: "EDS La Fría Industrial", municipality: "García de Hevia", axis: "Panamericano y Norte", status: "Operativa", lat: 8.2180, lng: -72.2475, dispensers: "6 Realtech", technician: "Ing. Javier Duarte", notes: "Alto caudal Diésel." },
+            { sapCode: "1004276", name: "EDS La Fría Centro", municipality: "García de Hevia", axis: "Panamericano y Norte", status: "Operativa", lat: 8.2140, lng: -72.2490, dispensers: "4 Gilbarco", technician: "Ing. Javier Duarte", notes: "SAP activo." },
+            { sapCode: "1004277", name: "EDS El Vigía / La Fría", municipality: "García de Hevia", axis: "Panamericano y Norte", status: "En Reparación", lat: 8.2250, lng: -72.2390, dispensers: "4 Realtech", technician: "Ing. Javier Duarte", notes: "Tablero control." },
+            { sapCode: "1004278", name: "EDS Boca de Grita", municipality: "García de Hevia", axis: "Panamericano y Norte", status: "Operativa", lat: 8.2980, lng: -72.3950, dispensers: "4 Realtech", technician: "Ing. Javier Duarte", notes: "Frontera norte." },
+            { sapCode: "1004279", name: "EDS Orope", municipality: "García de Hevia", axis: "Panamericano y Norte", status: "Operativa", lat: 8.3350, lng: -72.3420, dispensers: "3 Wayne", technician: "Ing. Javier Duarte", notes: "Vía Zulia." },
+            // Panamericano
+            { sapCode: "1004280", name: "EDS Coloncito Principal", municipality: "Panamericano", axis: "Panamericano y Norte", status: "Operativa", lat: 8.3210, lng: -72.0890, dispensers: "4 Realtech", technician: "Téc. Darío Salcedo", notes: "Agroindustrial." },
+            { sapCode: "1004281", name: "EDS La Palmita Panamericana", municipality: "Panamericano", axis: "Panamericano y Norte", status: "Operativa", lat: 8.2750, lng: -72.1650, dispensers: "4 Gilbarco", technician: "Téc. Darío Salcedo", notes: "Ganado / leche." },
+            { sapCode: "1004282", name: "EDS Morotuto", municipality: "Panamericano", axis: "Panamericano y Norte", status: "Operativa", lat: 8.3580, lng: -72.0420, dispensers: "3 Realtech", technician: "Téc. Darío Salcedo", notes: "Operativa." },
+            { sapCode: "1004283", name: "EDS El Tesoro", municipality: "Panamericano", axis: "Panamericano y Norte", status: "En Reparación", lat: 8.3020, lng: -72.1180, dispensers: "2 Wayne", technician: "Téc. Darío Salcedo", notes: "Medidores." },
+            // Samuel Darío Maldonado
+            { sapCode: "1004284", name: "EDS La Tendida Centro", municipality: "Samuel Darío Maldonado", axis: "Panamericano y Norte", status: "Operativa", lat: 8.4890, lng: -71.8840, dispensers: "4 Realtech", technician: "Téc. Darío Salcedo", notes: "Límite Táchira-Mérida." },
+            { sapCode: "1004285", name: "EDS Hernández", municipality: "Samuel Darío Maldonado", axis: "Panamericano y Norte", status: "Operativa", lat: 8.3650, lng: -71.9320, dispensers: "2 Gilbarco", technician: "Téc. Darío Salcedo", notes: "Ganadera." },
+            { sapCode: "1004286", name: "EDS Boconó Norte", municipality: "Samuel Darío Maldonado", axis: "Panamericano y Norte", status: "Operativa", lat: 8.4420, lng: -71.9150, dispensers: "3 Realtech", technician: "Téc. Darío Salcedo", notes: "Troncal 1." },
+            // Jáuregui
+            { sapCode: "1004287", name: "EDS La Grita Principal", municipality: "Jáuregui", axis: "Montaña", status: "Operativa", lat: 8.1360, lng: -71.9845, dispensers: "4 Realtech", technician: "Téc. Héctor Mora", notes: "Hortícola." },
+            { sapCode: "1004288", name: "EDS Llano Largo La Grita", municipality: "Jáuregui", axis: "Montaña", status: "Operativa", lat: 8.1280, lng: -71.9920, dispensers: "4 Gilbarco", technician: "Téc. Héctor Mora", notes: "Metrología." },
+            { sapCode: "1004289", name: "EDS Pueblo Hondo", municipality: "Jáuregui", axis: "Montaña", status: "Operativa", lat: 8.2150, lng: -71.9250, dispensers: "2 Wayne", technician: "Téc. Héctor Mora", notes: "Páramo." },
+            { sapCode: "1004290", name: "EDS Sabana Grande", municipality: "Jáuregui", axis: "Montaña", status: "En Reparación", lat: 8.1490, lng: -71.9760, dispensers: "2 Realtech", technician: "Téc. Héctor Mora", notes: "Mangueras." },
+            // Seboruco, Vargas, Miranda, Sucre, Uribante
+            { sapCode: "1004291", name: "EDS Seboruco Principal", municipality: "Seboruco", axis: "Montaña", status: "Cerrada", lat: 8.1450, lng: -72.0725, dispensers: "2 Tokheim", technician: "Téc. Héctor Mora", notes: "Evaluación tanques." },
+            { sapCode: "1004292", name: "EDS El Cobre", municipality: "José María Vargas", axis: "Montaña", status: "Operativa", lat: 8.0380, lng: -72.0620, dispensers: "3 Realtech", technician: "Téc. Héctor Mora", notes: "Agrícola." },
+            { sapCode: "1004293", name: "EDS San José de Bolívar", municipality: "Francisco de Miranda", axis: "Montaña", status: "Operativa", lat: 7.9120, lng: -71.9780, dispensers: "2 Gilbarco", technician: "Téc. Héctor Mora", notes: "Montaña." },
+            { sapCode: "1004294", name: "EDS Queniquea", municipality: "Sucre", axis: "Montaña", status: "Operativa", lat: 7.9180, lng: -72.0120, dispensers: "2 Realtech", technician: "Téc. Héctor Mora", notes: "Planta respaldo." },
+            { sapCode: "1004295", name: "EDS San Pablo Sucre", municipality: "Sucre", axis: "Montaña", status: "Operativa", lat: 7.9450, lng: -72.0350, dispensers: "2 Wayne", technician: "Téc. Héctor Mora", notes: "Estable." },
+            { sapCode: "1004296", name: "EDS Pregonero Principal", municipality: "Uribante", axis: "Montaña", status: "Operativa", lat: 8.0210, lng: -71.7640, dispensers: "3 Realtech", technician: "Téc. Héctor Mora", notes: "Capital Uribante." },
+            { sapCode: "1004297", name: "EDS La Fundación Uribante", municipality: "Uribante", axis: "Montaña", status: "Operativa", lat: 7.9350, lng: -71.7890, dispensers: "2 Gilbarco", technician: "Téc. Héctor Mora", notes: "Represa." },
+            { sapCode: "1004298", name: "EDS Potosí / Siberia", municipality: "Uribante", axis: "Montaña", status: "Cerrada", lat: 7.9820, lng: -71.7210, dispensers: "2 Tokheim", technician: "Téc. Héctor Mora", notes: "Auditoría PDVSA." },
+            // Michelena, Lobatera, Rafael Urdaneta, A. Rómulo Costa, Simón Rodríguez, San Judas Tadeo
+            { sapCode: "1004299", name: "EDS Michelena Principal", municipality: "Michelena", axis: "Panamericano y Norte", status: "Operativa", lat: 7.9540, lng: -72.2430, dispensers: "3 Realtech", technician: "Ing. Javier Duarte", notes: "Panamericana." },
+            { sapCode: "1004300", name: "EDS Boca de Monte", municipality: "Michelena", axis: "Panamericano y Norte", status: "Operativa", lat: 7.9320, lng: -72.2380, dispensers: "2 Gilbarco", technician: "Ing. Javier Duarte", notes: "Preventivo ok." },
+            { sapCode: "1004301", name: "EDS Lobatera Principal", municipality: "Lobatera", axis: "Panamericano y Norte", status: "Operativa", lat: 7.9280, lng: -72.2460, dispensers: "3 Realtech", technician: "Ing. Javier Duarte", notes: "Transporte minero." },
+            { sapCode: "1004302", name: "EDS Borotá", municipality: "Lobatera", axis: "Panamericano y Norte", status: "Operativa", lat: 7.8820, lng: -72.2540, dispensers: "2 Wayne", technician: "Ing. Javier Duarte", notes: "Normal." },
+            { sapCode: "1004303", name: "EDS Delicias Principal", municipality: "Rafael Urdaneta", axis: "Fronterizo", status: "Operativa", lat: 7.5680, lng: -72.4460, dispensers: "2 Realtech", technician: "Téc. Óscar Chacón", notes: "Frontera sur." },
+            { sapCode: "1004304", name: "EDS Las Mesas", municipality: "Antonio Rómulo Costa", axis: "Panamericano y Norte", status: "Operativa", lat: 8.1650, lng: -72.1620, dispensers: "3 Realtech", technician: "Téc. Darío Salcedo", notes: "Corredor norte." },
+            { sapCode: "1004305", name: "EDS San Simón", municipality: "Simón Rodríguez", axis: "Montaña", status: "Operativa", lat: 8.3340, lng: -71.8450, dispensers: "2 Gilbarco", technician: "Téc. Darío Salcedo", notes: "Límite Mérida." },
+            { sapCode: "1004306", name: "EDS Umuquena", municipality: "San Judas Tadeo", axis: "Panamericano y Norte", status: "Operativa", lat: 8.2780, lng: -72.0680, dispensers: "3 Realtech", technician: "Téc. Darío Salcedo", notes: "Agropecuaria." },
+            // Fernández Feo, Libertador, Córdoba
+            { sapCode: "1004307", name: "EDS El Piñal Principal", municipality: "Fernández Feo", axis: "Sur y Llanos", status: "Operativa", lat: 7.5320, lng: -71.9560, dispensers: "6 Realtech", technician: "Téc. Marco Contreras", notes: "Troncal 5 24h." },
+            { sapCode: "1004308", name: "EDS Chururú", municipality: "Fernández Feo", axis: "Sur y Llanos", status: "Operativa", lat: 7.5780, lng: -71.9820, dispensers: "4 Gilbarco", technician: "Téc. Marco Contreras", notes: "Pistolas y mangueras." },
+            { sapCode: "1004309", name: "EDS San Lorenzo Sur", municipality: "Fernández Feo", axis: "Sur y Llanos", status: "Operativa", lat: 7.5080, lng: -71.9120, dispensers: "3 Realtech", technician: "Téc. Marco Contreras", notes: "Vía llano." },
+            { sapCode: "1004310", name: "EDS Naranjales", municipality: "Fernández Feo", axis: "Sur y Llanos", status: "En Reparación", lat: 7.4850, lng: -71.8540, dispensers: "3 Wayne", technician: "Téc. Marco Contreras", notes: "Display isla 1." },
+            { sapCode: "1004311", name: "EDS Abejales Principal", municipality: "Libertador", axis: "Sur y Llanos", status: "Operativa", lat: 7.6240, lng: -71.5120, dispensers: "4 Realtech", technician: "Téc. Marco Contreras", notes: "Ganado Barinas/Apure." },
+            { sapCode: "1004312", name: "EDS Punta de Piedra", municipality: "Libertador", axis: "Sur y Llanos", status: "Operativa", lat: 7.5890, lng: -71.4580, dispensers: "4 Gilbarco", technician: "Téc. Marco Contreras", notes: "Telemetría." },
+            { sapCode: "1004313", name: "EDS El Cantón", municipality: "Libertador", axis: "Sur y Llanos", status: "Operativa", lat: 7.4820, lng: -71.4950, dispensers: "2 Realtech", technician: "Téc. Marco Contreras", notes: "Agropecuaria sur." },
+            { sapCode: "1004314", name: "EDS Santa Ana Principal", municipality: "Córdoba", axis: "Sur y Llanos", status: "Operativa", lat: 7.6430, lng: -72.2765, dispensers: "4 Realtech", technician: "Téc. Óscar Chacón", notes: "Bombas sumergibles." },
+            { sapCode: "1004315", name: "EDS Río Chiquito", municipality: "Córdoba", axis: "Sur y Llanos", status: "Operativa", lat: 7.6180, lng: -72.2940, dispensers: "2 Gilbarco", technician: "Téc. Óscar Chacón", notes: "Cafetalera." }
+        ];
+
+        let stations = [];
+        let useCluster = true;
+        let isPicking = false;
+
+        const map = L.map('map', { zoomControl: false }).setView([7.88, -72.12], 9);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+        const clusterGroup = L.markerClusterGroup({ maxClusterRadius: 40 });
+        map.addLayer(clusterGroup);
+
+        map.on('click', e => {
+            if (!isPicking) return;
+            document.getElementById('fLat').value = e.latlng.lat.toFixed(5);
+            document.getElementById('fLng').value = e.latlng.lng.toFixed(5);
+            cancelPick();
+            document.getElementById('editModal').classList.remove('hidden');
+            showToast(`GPS capturado: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`);
+        });
+
+        function initApp() {
+            const munSel = document.getElementById('munFilter');
+            const fMunSel = document.getElementById('fMun');
+            MUNICIPALITIES.forEach(m => {
+                munSel.innerHTML += `<option value="${m}">${m}</option>`;
+                fMunSel.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+
+            const saved = localStorage.getItem('tecnoserv_eds_tachira');
+            stations = saved ? JSON.parse(saved) : [...BASE_STATIONS];
+            render();
+        }
+
+        function save() {
+            localStorage.setItem('tecnoserv_eds_tachira', JSON.stringify(stations));
+        }
+
+        function render() {
+            let op = 0, rep = 0, cer = 0;
+            stations.forEach(s => {
+                if (s.status === 'Operativa') op++;
+                else if (s.status === 'En Reparación') rep++;
+                else if (s.status === 'Cerrada') cer++;
+            });
+            document.getElementById('kpi-total').textContent = stations.length;
+            document.getElementById('kpi-op').textContent = op;
+            document.getElementById('kpi-rep').textContent = rep;
+            document.getElementById('kpi-cer').textContent = cer;
+
+            const search = document.getElementById('search').value.toLowerCase();
+            const mun = document.getElementById('munFilter').value;
+            const axis = document.getElementById('axisFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = stations.filter(s => {
+                return (!search || s.sapCode.includes(search) || s.name.toLowerCase().includes(search) || s.municipality.toLowerCase().includes(search)) &&
+                       (!mun || s.municipality === mun) && (!axis || s.axis === axis) && (!status || s.status === status);
+            });
+
+            document.getElementById('count').textContent = filtered.length;
+            clusterGroup.clearLayers();
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filtered.forEach(s => {
+                const color = s.status === 'Operativa' ? '#10b981' : s.status === 'En Reparación' ? '#f59e0b' : '#ef4444';
+                const icon = L.divIcon({
+                    html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid #fff;"></div>`,
+                    iconSize: [14, 14], iconAnchor: [7, 7]
+                });
+
+                const marker = L.marker([s.lat, s.lng], { icon }).bindPopup(`
+                    <div class="space-y-1.5 text-xs">
+                        <div class="font-mono text-amber-400 font-bold">SAP: ${s.sapCode}</div>
+                        <div class="font-bold text-white text-sm">${s.name}</div>
+                        <div class="text-slate-400">${s.municipality} • ${s.axis}</div>
+                        <div class="bg-slate-900 p-2 rounded border border-slate-800 text-[11px]">
+                            <div><b>Estatus:</b> ${s.status}</div>
+                            <div><b>Equipos:</b> ${s.dispensers}</div>
+                            <div><b>Notas:</b> ${s.notes}</div>
+                        </div>
+                        <button onclick="openModal('${s.sapCode}')" class="w-full bg-amber-500 text-slate-950 font-bold py-1 rounded">Editar EDS</button>
+                    </div>
+                `);
+                clusterGroup.addLayer(marker);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-850 transition">
+                        <td class="p-2.5 font-mono text-amber-400 font-bold">${s.sapCode}</td>
+                        <td class="p-2.5">
+                            <div class="font-bold text-white cursor-pointer hover:text-amber-300" onclick="flyTo('${s.sapCode}')">${s.name}</div>
+                            <div class="text-[10px] text-slate-400">${s.municipality}</div>
+                        </td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-semibold ${s.status==='Operativa'?'bg-emerald-950 text-emerald-400 border border-emerald-800':s.status==='En Reparación'?'bg-amber-950 text-amber-400 border border-amber-800':'bg-rose-950 text-rose-400 border border-rose-800'}">${s.status}</span></td>
+                        <td class="p-2.5 max-w-[180px] truncate text-slate-400 text-[11px]">${s.notes || '-'}</td>
+                        <td class="p-2.5 text-right space-x-1">
+                            <button onclick="flyTo('${s.sapCode}')" class="bg-slate-800 hover:bg-sky-600 p-1.5 rounded text-slate-300"><i class="fa-solid fa-location-crosshairs"></i></button>
+                            <button onclick="openModal('${s.sapCode}')" class="bg-slate-800 hover:bg-amber-500 p-1.5 rounded text-amber-400 hover:text-slate-950"><i class="fa-solid fa-pen"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.flyTo = sap => {
+            const s = stations.find(x => x.sapCode === sap);
+            if (s) {
+                map.setView([s.lat, s.lng], 14, { animate: true });
+                clusterGroup.eachLayer(l => {
+                    if (l.getLatLng().lat === s.lat && l.getLatLng().lng === s.lng) {
+                        clusterGroup.zoomToShowLayer(l, () => l.openPopup());
+                    }
+                });
+            }
+        };
+
+        window.filterStatus = st => { document.getElementById('statusFilter').value = st; render(); };
+        window.resetFilters = () => { document.getElementById('search').value=''; document.getElementById('munFilter').value=''; document.getElementById('axisFilter').value=''; document.getElementById('statusFilter').value=''; render(); };
+
+        window.toggleCluster = () => {
+            useCluster = !useCluster;
+            document.getElementById('btn-cluster').textContent = `Agrupar: ${useCluster ? 'ON' : 'OFF'}`;
+            // MarkerCluster manages grouping automatically
+        };
+
+        window.openModal = sap => {
+            const modal = document.getElementById('editModal');
+            const delBtn = document.getElementById('btnDel');
+            if (sap) {
+                const s = stations.find(x => x.sapCode === sap);
+                document.getElementById('modalTitle').textContent = `Editar EDS: ${s.name}`;
+                document.getElementById('origSap').value = s.sapCode;
+                document.getElementById('fSap').value = s.sapCode;
+                document.getElementById('fName').value = s.name;
+                document.getElementById('fStatus').value = s.status;
+                document.getElementById('fMun').value = s.municipality;
+                document.getElementById('fAxis').value = s.axis;
+                document.getElementById('fDisp').value = s.dispensers || '';
+                document.getElementById('fTech').value = s.technician || '';
+                document.getElementById('fLat').value = s.lat;
+                document.getElementById('fLng').value = s.lng;
+                document.getElementById('fNotes').value = s.notes || '';
+                delBtn.classList.remove('hidden');
+            } else {
+                document.getElementById('modalTitle').textContent = 'Registrar Nueva EDS';
+                document.getElementById('origSap').value = '';
+                document.getElementById('fSap').value = '1004' + (stations.length + 320);
+                document.getElementById('fName').value = '';
+                document.getElementById('fStatus').value = 'Operativa';
+                document.getElementById('fMun').value = 'San Cristóbal';
+                document.getElementById('fAxis').value = 'Metropolitano';
+                document.getElementById('fDisp').value = '4 Realtech';
+                document.getElementById('fTech').value = 'Ing. Técnico';
+                const c = map.getCenter();
+                document.getElementById('fLat').value = c.lat.toFixed(5);
+                document.getElementById('fLng').value = c.lng.toFixed(5);
+                document.getElementById('fNotes').value = '';
+                delBtn.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+        };
+
+        window.closeModal = () => { document.getElementById('editModal').classList.add('hidden'); cancelPick(); };
+
+        window.startPick = () => {
+            isPicking = true;
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('pick-banner').classList.remove('hidden');
+        };
+
+        window.cancelPick = () => { isPicking = false; document.getElementById('pick-banner').classList.add('hidden'); };
+
+        document.getElementById('edsForm').onsubmit = e => {
+            e.preventDefault();
+            const orig = document.getElementById('origSap').value;
+            const sap = document.getElementById('fSap').value.trim();
+            const obj = {
+                sapCode: sap,
+                name: document.getElementById('fName').value.trim(),
+                status: document.getElementById('fStatus').value,
+                municipality: document.getElementById('fMun').value,
+                axis: document.getElementById('fAxis').value,
+                dispensers: document.getElementById('fDisp').value.trim(),
+                technician: document.getElementById('fTech').value.trim(),
+                lat: parseFloat(document.getElementById('fLat').value),
+                lng: parseFloat(document.getElementById('fLng').value),
+                notes: document.getElementById('fNotes').value.trim()
+            };
+
+            if (orig) {
+                const idx = stations.findIndex(x => x.sapCode === orig);
+                if (idx !== -1) stations[idx] = obj;
+            } else {
+                stations.unshift(obj);
+            }
+
+            save();
+            closeModal();
+            render();
+            showToast('Guardado correctamente');
+        };
+
+        window.deleteEds = () => {
+            const sap = document.getElementById('origSap').value;
+            stations = stations.filter(x => x.sapCode !== sap);
+            save();
+            closeModal();
+            render();
+            showToast('EDS eliminada');
+        };
+
+        window.restoreDefault = () => {
+            if (confirm('¿Restaurar inventario original de 115 EDS?')) {
+                stations = [...BASE_STATIONS];
+                save();
+                render();
+                showToast('Inventario restaurado');
+            }
+        };
+
+        window.openExport = () => {
+            const docs = stations.map(s => ({
+                sapCode: s.sapCode, name: s.name, municipality: s.municipality, axis: s.axis, status: s.status,
+                dispensers: s.dispensers, technician: s.technician, notes: s.notes,
+                location: { type: "Point", coordinates: [s.lng, s.lat] }
+            }));
+            document.getElementById('jsonPreview').value = JSON.stringify(docs, null, 2);
+            document.getElementById('exportModal').classList.remove('hidden');
+        };
+
+        window.closeExport = () => document.getElementById('exportModal').classList.add('hidden');
+
+        window.downloadJson = () => {
+            const blob = new Blob([document.getElementById('jsonPreview').value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'tachira_eds_mongodb.json';
+            a.click(); URL.revokeObjectURL(url);
+            showToast('Archivo descargado');
+        };
+
+        window.copyJson = () => {
+            document.getElementById('jsonPreview').select();
+            document.execCommand('copy');
+            showToast('Copiado al portapapeles');
+        };
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.remove('translate-y-4', 'opacity-0'), 10);
+            setTimeout(() => {
+                t.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => t.classList.add('hidden'), 300);
+            }, 2500);
+        }
+
+        document.getElementById('search').oninput = render;
+        document.getElementById('munFilter').onchange = render;
+        document.getElementById('axisFilter').onchange = render;
+        document.getElementById('statusFilter').onchange = render;
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
