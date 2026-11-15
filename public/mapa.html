@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es"
+    class="dark">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
     <title>GIS EDS Táchira (115 Estaciones) | Tecnoserv de Coquivacoa C.A.</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,27 +16,65 @@
         }
     </script>
     <!-- Leaflet & Cluster CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        crossorigin="" />
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        #map { height: 100%; min-height: 450px; width: 100%; z-index: 10; }
-        .leaflet-popup-content-wrapper { background: #0f172a !important; color: #f8fafc !important; border-radius: 0.75rem !important; border: 1px solid #334155 !important; }
-        .leaflet-popup-tip { background: #0f172a !important; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #map {
+            height: 100%;
+            min-height: 450px;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #0f172a !important;
+            color: #f8fafc !important;
+            border-radius: 0.75rem !important;
+            border: 1px solid #334155 !important;
+        }
+
+        .leaflet-popup-tip {
+            background: #0f172a !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
     </style>
 </head>
+
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 z-[9999] hidden transition-all duration-300 transform translate-y-4 opacity-0">
-        <div class="bg-slate-900 border border-amber-500/60 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-medium">
-            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <div id="toast"
+        class="fixed bottom-5 right-5 z-[9999] hidden transition-all duration-300 transform translate-y-4 opacity-0">
+        <div
+            class="bg-slate-900 border border-amber-500/60 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-medium">
+            <i id="toast-icon"
+                class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
             <span id="toast-message">Operación exitosa</span>
         </div>
     </div>
@@ -56,38 +97,65 @@
             <!-- KPIs & Actions -->
             <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-between lg:justify-end text-xs">
                 <div class="flex items-center gap-1.5">
-                    <button onclick="filterStatus('')" class="bg-slate-850 border border-slate-700 px-2.5 py-1.5 rounded-lg">Total: <strong id="kpi-total" class="text-white">0</strong></button>
-                    <button onclick="filterStatus('Operativa')" class="bg-emerald-950/70 border border-emerald-700/70 text-emerald-300 px-2.5 py-1.5 rounded-lg">Operativas: <strong id="kpi-op" class="text-white">0</strong></button>
-                    <button onclick="filterStatus('En Reparación')" class="bg-amber-950/70 border border-amber-700/70 text-amber-300 px-2.5 py-1.5 rounded-lg">Reparación: <strong id="kpi-rep" class="text-white">0</strong></button>
-                    <button onclick="filterStatus('Cerrada')" class="bg-rose-950/70 border border-rose-700/70 text-rose-300 px-2.5 py-1.5 rounded-lg">Cerradas: <strong id="kpi-cer" class="text-white">0</strong></button>
+                    <button onclick="filterStatus('')"
+                        class="bg-slate-850 border border-slate-700 px-2.5 py-1.5 rounded-lg">Total: <strong
+                            id="kpi-total"
+                            class="text-white">0</strong></button>
+                    <button onclick="filterStatus('Operativa')"
+                        class="bg-emerald-950/70 border border-emerald-700/70 text-emerald-300 px-2.5 py-1.5 rounded-lg">Operativas:
+                        <strong id="kpi-op"
+                            class="text-white">0</strong></button>
+                    <button onclick="filterStatus('En Reparación')"
+                        class="bg-amber-950/70 border border-amber-700/70 text-amber-300 px-2.5 py-1.5 rounded-lg">Reparación:
+                        <strong id="kpi-rep"
+                            class="text-white">0</strong></button>
+                    <button onclick="filterStatus('Cerrada')"
+                        class="bg-rose-950/70 border border-rose-700/70 text-rose-300 px-2.5 py-1.5 rounded-lg">Cerradas:
+                        <strong id="kpi-cer"
+                            class="text-white">0</strong></button>
                 </div>
                 <div class="flex items-center gap-1.5 ml-auto">
-                    <button onclick="openModal(null)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> Nueva EDS</button>
-                    <button onclick="openExport()" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1"><i class="fa-solid fa-database"></i> MongoDB</button>
+                    <button onclick="openModal(null)"
+                        class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1"><i
+                            class="fa-solid fa-plus"></i> Nueva EDS</button>
+                    <button onclick="openExport()"
+                        class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1"><i
+                            class="fa-solid fa-database"></i> MongoDB</button>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Map Pick Banner -->
-    <div id="pick-banner" class="hidden bg-amber-500 text-slate-950 py-2 text-xs font-bold text-center z-30 flex items-center justify-center gap-3">
-        <span><i class="fa-solid fa-crosshairs fa-spin mr-1"></i> Haz clic en el mapa para asignar las coordenadas exactas de la EDS.</span>
-        <button onclick="cancelPick()" class="bg-slate-950 text-white px-2 py-0.5 rounded text-[10px]">Cancelar</button>
+    <div id="pick-banner"
+        class="hidden bg-amber-500 text-slate-950 py-2 text-xs font-bold text-center z-30 flex items-center justify-center gap-3">
+        <span><i class="fa-solid fa-crosshairs fa-spin mr-1"></i> Haz clic en el mapa para asignar las coordenadas
+            exactas de la EDS.</span>
+        <button onclick="cancelPick()"
+            class="bg-slate-950 text-white px-2 py-0.5 rounded text-[10px]">Cancelar</button>
     </div>
 
     <!-- Main Workspace -->
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 flex flex-col gap-3">
         <!-- Filters Bar -->
-        <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2 text-xs">
+        <div
+            class="bg-slate-900 border border-slate-800 p-2.5 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2 text-xs">
             <div class="md:col-span-4 relative">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
-                <input type="text" id="search" placeholder="Buscar SAP, EDS, técnico..." class="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-amber-500">
+                <input type="text"
+                    id="search"
+                    placeholder="Buscar SAP, EDS, técnico..."
+                    class="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-amber-500">
             </div>
             <div class="md:col-span-3">
-                <select id="munFilter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500"><option value="">Todos los Municipios</option></select>
+                <select id="munFilter"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                    <option value="">Todos los Municipios</option>
+                </select>
             </div>
             <div class="md:col-span-2">
-                <select id="axisFilter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                <select id="axisFilter"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500">
                     <option value="">Todos los Ejes</option>
                     <option value="Metropolitano">Metropolitano</option>
                     <option value="Fronterizo">Fronterizo</option>
@@ -97,7 +165,8 @@
                 </select>
             </div>
             <div class="md:col-span-2">
-                <select id="statusFilter" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                <select id="statusFilter"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none focus:border-amber-500">
                     <option value="">Todos los Estatus</option>
                     <option value="Operativa">Operativa</option>
                     <option value="En Reparación">En Reparación</option>
@@ -105,28 +174,41 @@
                 </select>
             </div>
             <div class="md:col-span-1">
-                <button onclick="resetFilters()" class="w-full bg-slate-800 hover:bg-slate-700 py-1.5 rounded-xl text-slate-300 font-medium transition" title="Limpiar"><i class="fa-solid fa-rotate-left"></i></button>
+                <button onclick="resetFilters()"
+                    class="w-full bg-slate-800 hover:bg-slate-700 py-1.5 rounded-xl text-slate-300 font-medium transition"
+                    title="Limpiar"><i class="fa-solid fa-rotate-left"></i></button>
             </div>
         </div>
 
         <!-- Split Map + Table -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1">
-            <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[450px] lg:h-[650px] relative">
+            <div
+                class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[450px] lg:h-[650px] relative">
                 <div class="bg-slate-850 px-3 py-2 border-b border-slate-800 flex justify-between items-center text-xs">
-                    <span class="font-bold text-white"><i class="fa-solid fa-map text-amber-500 mr-1"></i> Mapa Táchira GIS</span>
-                    <button onclick="toggleCluster()" id="btn-cluster" class="text-[11px] bg-slate-800 text-amber-400 px-2 py-1 rounded">Agrupar: ON</button>
+                    <span class="font-bold text-white"><i class="fa-solid fa-map text-amber-500 mr-1"></i> Mapa Táchira
+                        GIS</span>
+                    <button onclick="toggleCluster()"
+                        id="btn-cluster"
+                        class="text-[11px] bg-slate-800 text-amber-400 px-2 py-1 rounded">Agrupar: ON</button>
                 </div>
-                <div id="map" class="flex-1"></div>
+                <div id="map"
+                    class="flex-1"></div>
             </div>
 
-            <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[500px] lg:h-[650px]">
+            <div
+                class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[500px] lg:h-[650px]">
                 <div class="bg-slate-850 px-3 py-2 border-b border-slate-800 flex justify-between items-center text-xs">
-                    <span class="font-bold text-white"><i class="fa-solid fa-table-list text-amber-500 mr-1"></i> Inventario Editable (<span id="count" class="text-amber-400">0</span> EDS)</span>
-                    <button onclick="restoreDefault()" class="text-[11px] text-slate-400 hover:text-rose-400"><i class="fa-solid fa-clock-rotate-left"></i> Restaurar</button>
+                    <span class="font-bold text-white"><i class="fa-solid fa-table-list text-amber-500 mr-1"></i>
+                        Inventario Editable (<span id="count"
+                            class="text-amber-400">0</span> EDS)</span>
+                    <button onclick="restoreDefault()"
+                        class="text-[11px] text-slate-400 hover:text-rose-400"><i
+                            class="fa-solid fa-clock-rotate-left"></i> Restaurar</button>
                 </div>
                 <div class="overflow-auto flex-1">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-950 sticky top-0 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                        <thead
+                            class="bg-slate-950 sticky top-0 text-slate-400 uppercase text-[10px] border-b border-slate-800">
                             <tr>
                                 <th class="p-2.5">SAP</th>
                                 <th class="p-2.5">Estación / Municipio</th>
@@ -135,7 +217,8 @@
                                 <th class="p-2.5 text-right">Acción</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody" class="divide-y divide-slate-800 text-slate-300"></tbody>
+                        <tbody id="tableBody"
+                            class="divide-y divide-slate-800 text-slate-300"></tbody>
                     </table>
                 </div>
             </div>
@@ -143,28 +226,40 @@
     </main>
 
     <!-- Modal Edit/Create -->
-    <div id="editModal" class="fixed inset-0 z-[5000] hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="editModal"
+        class="fixed inset-0 z-[5000] hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-3 text-xs shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <h3 id="modalTitle" class="font-bold text-sm text-white">Editar EDS</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+                <h3 id="modalTitle"
+                    class="font-bold text-sm text-white">Editar EDS</h3>
+                <button onclick="closeModal()"
+                    class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
-            <form id="edsForm" class="space-y-3">
-                <input type="hidden" id="origSap">
+            <form id="edsForm"
+                class="space-y-3">
+                <input type="hidden"
+                    id="origSap">
                 <div class="grid grid-cols-3 gap-2">
                     <div>
                         <label class="block text-slate-400 mb-1">SAP *</label>
-                        <input type="text" id="fSap" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-amber-400 font-mono font-bold">
+                        <input type="text"
+                            id="fSap"
+                            required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-amber-400 font-mono font-bold">
                     </div>
                     <div class="col-span-2">
                         <label class="block text-slate-400 mb-1">Nombre *</label>
-                        <input type="text" id="fName" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold">
+                        <input type="text"
+                            id="fName"
+                            required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold">
                     </div>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
                     <div>
                         <label class="block text-slate-400 mb-1">Estatus *</label>
-                        <select id="fStatus" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold">
+                        <select id="fStatus"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold">
                             <option value="Operativa">Operativa</option>
                             <option value="En Reparación">En Reparación</option>
                             <option value="Cerrada">Cerrada</option>
@@ -172,48 +267,76 @@
                     </div>
                     <div>
                         <label class="block text-slate-400 mb-1">Municipio *</label>
-                        <select id="fMun" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"></select>
+                        <select id="fMun"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"></select>
                     </div>
                     <div>
-                        <label class="block text-slate-400 mb-1">Eje *</label>
-                        <select id="fAxis" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-                            <option value="Metropolitano">Metropolitano</option>
-                            <option value="Fronterizo">Fronterizo</option>
-                            <option value="Panamericano y Norte">Panamericano y Norte</option>
-                            <option value="Montaña">Montaña</option>
-                            <option value="Sur y Llanos">Sur y Llanos</option>
-                        </select>
+                        <labe class="block text-slate-400 mb-1">Eje *</label>
+                            <select id="fAxis"
+                                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                                <option value="Metropolitano">Metropolitano</option>
+                                <option value="Fronterizo">Fronterizo</option>
+                                <option value="Panamericano y Norte">Panamericano y Norte</option>
+                                <option value="Montaña">Montaña</option>
+                                <option value="Sur y Llanos">Sur y Llanos</option>
+                            </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-slate-400 mb-1">Surtidores</label>
-                        <input type="text" id="fDisp" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200">
+                        <input type="text"
+                            id="fDisp"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200">
                     </div>
                     <div>
                         <label class="block text-slate-400 mb-1">Técnico</label>
-                        <input type="text" id="fTech" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200">
+                        <input type="text"
+                            id="fTech"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200">
                     </div>
                 </div>
                 <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 space-y-1.5">
                     <div class="flex justify-between items-center">
                         <span class="text-slate-300">Coordenadas GPS</span>
-                        <button type="button" onclick="startPick()" class="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-semibold"><i class="fa-solid fa-map-pin"></i> Capturar en Mapa</button>
+                        <button type="button"
+                            onclick="startPick()"
+                            class="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-semibold"><i
+                                class="fa-solid fa-map-pin"></i> Capturar en Mapa</button>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="number" step="any" id="fLat" required placeholder="Lat" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-slate-200">
-                        <input type="number" step="any" id="fLng" required placeholder="Lng" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-slate-200">
+                        <input type="number"
+                            step="any"
+                            id="fLat"
+                            required
+                            placeholder="Lat"
+                            class="bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-slate-200">
+                        <input type="number"
+                            step="any"
+                            id="fLng"
+                            required
+                            placeholder="Lng"
+                            class="bg-slate-900 border border-slate-700 rounded px-2 py-1 font-mono text-slate-200">
                     </div>
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Diagnóstico / Notas</label>
-                    <textarea id="fNotes" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200"></textarea>
+                    <textarea id="fNotes"
+                        rows="2"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200"></textarea>
                 </div>
                 <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-                    <button type="button" id="btnDel" onclick="deleteEds()" class="bg-rose-950 text-rose-300 px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                    <button type="button"
+                        id="btnDel"
+                        onclick="deleteEds()"
+                        class="bg-rose-950 text-rose-300 px-3 py-1.5 rounded-lg font-semibold"><i
+                            class="fa-solid fa-trash"></i> Eliminar</button>
                     <div class="flex gap-2">
-                        <button type="button" onclick="closeModal()" class="bg-slate-800 px-3 py-1.5 rounded-lg text-slate-300">Cancelar</button>
-                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-lg">Guardar</button>
+                        <button type="button"
+                            onclick="closeModal()"
+                            class="bg-slate-800 px-3 py-1.5 rounded-lg text-slate-300">Cancelar</button>
+                        <button type="submit"
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-lg">Guardar</button>
                     </div>
                 </div>
             </form>
@@ -221,22 +344,32 @@
     </div>
 
     <!-- Modal Export MongoDB -->
-    <div id="exportModal" class="fixed inset-0 z-[5000] hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="exportModal"
+        class="fixed inset-0 z-[5000] hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 space-y-3 text-xs shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <h3 class="font-bold text-sm text-white">MongoDB Atlas & VSCodroid Export</h3>
-                <button onclick="closeExport()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+                <button onclick="closeExport()"
+                    class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
             </div>
             <div class="flex gap-2">
-                <button onclick="downloadJson()" class="bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl flex items-center gap-1.5"><i class="fa-solid fa-download"></i> Descargar .json</button>
-                <button onclick="copyJson()" class="bg-slate-800 text-amber-400 border border-slate-700 font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5"><i class="fa-solid fa-copy"></i> Copiar JSON</button>
+                <button onclick="downloadJson()"
+                    class="bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl flex items-center gap-1.5"><i
+                        class="fa-solid fa-download"></i> Descargar .json</button>
+                <button onclick="copyJson()"
+                    class="bg-slate-800 text-amber-400 border border-slate-700 font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5"><i
+                        class="fa-solid fa-copy"></i> Copiar JSON</button>
             </div>
-            <textarea id="jsonPreview" readonly rows="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-emerald-400"></textarea>
+            <textarea id="jsonPreview"
+                readonly
+                rows="10"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-mono text-[11px] text-emerald-400"></textarea>
         </div>
     </div>
 
     <!-- Leaflet JS & Cluster -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        crossorigin=""></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <script>
@@ -439,7 +572,7 @@
 
             const filtered = stations.filter(s => {
                 return (!search || s.sapCode.includes(search) || s.name.toLowerCase().includes(search) || s.municipality.toLowerCase().includes(search)) &&
-                       (!mun || s.municipality === mun) && (!axis || s.axis === axis) && (!status || s.status === status);
+                    (!mun || s.municipality === mun) && (!axis || s.axis === axis) && (!status || s.status === status);
             });
 
             document.getElementById('count').textContent = filtered.length;
@@ -477,7 +610,7 @@
                             <div class="font-bold text-white cursor-pointer hover:text-amber-300" onclick="flyTo('${s.sapCode}')">${s.name}</div>
                             <div class="text-[10px] text-slate-400">${s.municipality}</div>
                         </td>
-                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-semibold ${s.status==='Operativa'?'bg-emerald-950 text-emerald-400 border border-emerald-800':s.status==='En Reparación'?'bg-amber-950 text-amber-400 border border-amber-800':'bg-rose-950 text-rose-400 border border-rose-800'}">${s.status}</span></td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-semibold ${s.status === 'Operativa' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : s.status === 'En Reparación' ? 'bg-amber-950 text-amber-400 border border-amber-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">${s.status}</span></td>
                         <td class="p-2.5 max-w-[180px] truncate text-slate-400 text-[11px]">${s.notes || '-'}</td>
                         <td class="p-2.5 text-right space-x-1">
                             <button onclick="flyTo('${s.sapCode}')" class="bg-slate-800 hover:bg-sky-600 p-1.5 rounded text-slate-300"><i class="fa-solid fa-location-crosshairs"></i></button>
@@ -501,7 +634,7 @@
         };
 
         window.filterStatus = st => { document.getElementById('statusFilter').value = st; render(); };
-        window.resetFilters = () => { document.getElementById('search').value=''; document.getElementById('munFilter').value=''; document.getElementById('axisFilter').value=''; document.getElementById('statusFilter').value=''; render(); };
+        window.resetFilters = () => { document.getElementById('search').value = ''; document.getElementById('munFilter').value = ''; document.getElementById('axisFilter').value = ''; document.getElementById('statusFilter').value = ''; render(); };
 
         window.toggleCluster = () => {
             useCluster = !useCluster;
@@ -648,5 +781,8 @@
 
         window.onload = initApp;
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY_AQUI&callback=initMap" async defer></script>
+    
 </body>
+
 </html>
