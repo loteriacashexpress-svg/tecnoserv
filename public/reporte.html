@@ -62,13 +62,17 @@
             <input type="time" id="repHoraSalida" required>
           </div>
           <div class="form-group" style="grid-column: 1 / -1;">
-            <label>Número WhatsApp Destino / Teléfono del Supervisor</label>
+            <label>Número WhatsApp Destino / Teléfono del Supervisor o Destinatario</label>
             <div style="display: flex; gap: 0.5rem;">
               <input type="tel" id="repWhatsappNum" placeholder="Ej. 584121234567" required style="flex: 1;">
               <select id="selectContactoRapido" onchange="seleccionarContactoRapido(this.value)" style="flex: 1;">
                 <option value="">-- Contactos Frecuentes / Supervisor --</option>
-                <option value="584121234567">Central / Operaciones Coquivacoa</option>
-                <option value="584149876543">Supervisor Guardia PDVSA</option>
+                <option value="584">Central / Operaciones Coquivacoa</option>
+                <option value="584247678999">Supervisor Guardia PDVSA</option>
+                <option value="584246730030">Ing. Jorge Bautista (PDVSA)</option>
+                <option value="584140793060">Ing. Richard Vivas (PDVSA)</option>
+                <option value="584247135379">Ing. Yenny Betancourt (PDVSA)</option>
+                <option value="584149795166">TSU. Javier Pineda (Respaldo)</option>
               </select>
             </div>
             <small style="color: #666;">Incluye código de país (Ej: 58...) o selecciona un contacto rápido.</small>
