@@ -30,6 +30,30 @@
       transform: translateY(-1px);
       box-shadow: 0 6px 12px rgba(5, 150, 105, 0.3);
     }
+    /* Estilo para el botón de consulta de fallas */
+    .btn-fallas-header {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      color: white;
+      font-weight: bold;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 6px rgba(29, 78, 216, 0.2);
+      transition: all 0.2s ease-in-out;
+      text-decoration: none;
+      width: auto !important;
+      margin-top: 0.75rem;
+    }
+    .btn-fallas-header:hover {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(29, 78, 216, 0.3);
+    }
   </style>
 </head>
 
@@ -42,10 +66,13 @@
     <h1>COQUIVACOA C.A. - Panel de Control</h1>
     <p id="userRoleSubtitle">Mantenimiento de Surtidores y Dispensadores</p>
     
-    <!-- Botón Elegante de Reporte Fotográfico -->
-    <div>
+    <!-- Botones de Acceso Rápido -->
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
       <button onclick="window.location.href='reporte.html'" class="btn-reporte-header">
         📷 Generar Reporte Fotográfico WhatsApp
+      </button>
+      <button onclick="window.location.href='fallas.html'" class="btn-fallas-header">
+        🛠️ Fallas y Errores (Modo IA)
       </button>
     </div>
 

@@ -22,7 +22,10 @@
     <img src="Logo.jpg" alt="Logo Coquivacoa C.A." style="max-height: 70px; width: auto; object-fit: contain; background: white; padding: 4px; border-radius: 6px;">
     <h1>COQUIVACOA C.A. - Reporte de Campo</h1>
     <p>Checklist con Detalles y Envío vía WhatsApp</p>
-    <button onclick="window.location.href='dashboard.html'" style="width: auto; padding: 0.4rem 1rem; margin-top: 0.5rem; background: #374151;">⬅️ Volver al Panel</button>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 0.5rem;">
+      <button type="button" onclick="window.location.href='dashboard.html'" style="width: auto; padding: 0.4rem 1rem; background: #374151;">⬅️ Volver al Panel</button>
+      <button type="button" onclick="window.location.href='fallas.html'" style="width: auto; padding: 0.4rem 1rem; background: #1d4ed8;">🛠️ Guía de Fallas</button>
+    </div>
   </header>
 
   <div class="container">
@@ -193,6 +196,16 @@
       
       const horaActual = new Date().toTimeString().slice(0,5);
       document.getElementById('repHoraEntrada').value = horaActual;
+
+      // Cargar diagnóstico enviado desde fallas.html si existe
+      const fallaSugerida = sessionStorage.getItem('fallaSugerida');
+      if (fallaSugerida) {
+        const obsInput = document.getElementById('repObservaciones');
+        obsInput.value = obsInput.value
+          ? `${obsInput.value}\n${fallaSugerida}`
+          : fallaSugerida;
+        sessionStorage.removeItem('fallaSugerida');
+      }
     });
 
     function seleccionarContactoRapido(valor) {
