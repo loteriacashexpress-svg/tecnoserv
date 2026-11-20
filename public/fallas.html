@@ -23,6 +23,14 @@
     .btn-sm { padding: 0.45rem 0.75rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
     .btn-reporte { background: #16a34a; color: #fff; }
     .btn-buscar-ia { background: #0f172a; color: #fff; }
+    .ia-pegar-panel { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+    .ia-pegar-panel summary { cursor: pointer; font-weight: 700; color: #1e3a8a; font-size: 0.95rem; }
+    .ia-pegar-form { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.75rem; }
+    .ia-pegar-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .ia-pegar-row select, .ia-pegar-row input, .ia-pegar-form textarea { padding: 0.55rem 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 0.9rem; }
+    .ia-pegar-row select { flex: 1; min-width: 170px; }
+    .ia-pegar-row input { flex: 2; min-width: 210px; }
+    .btn-guardar-ia { width: auto; align-self: flex-start; background: #1d4ed8; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-top: 0; }
   </style>
 </head>
 <body>
@@ -32,8 +40,8 @@
     <h1>COQUIVACOA C.A. - Guía de Fallas y Correctivos</h1>
     <p>Diagnóstico Rápido para Dispensadores y Surtidores (PDVSA)</p>
     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 0.25rem;">
-      <button onclick="window.location.href='dashboard.html'" style="width: auto; padding: 0.4rem 1rem; background: #374151;">⬅️ Volver al Panel</button>
-      <button onclick="window.location.href='reporte.html'" style="width: auto; padding: 0.4rem 1rem; background: #16a34a;">📋 Ir a Reporte</button>
+      <button type="button" onclick="window.location.href='dashboard.html'" style="width: auto; padding: 0.4rem 1rem; background: #374151; margin-top: 0;">⬅️ Volver al Panel</button>
+      <button type="button" onclick="window.location.href='reporte.html'" style="width: auto; padding: 0.4rem 1rem; background: #16a34a; margin-top: 0;">📋 Ir a Reporte</button>
     </div>
   </header>
 
@@ -68,6 +76,32 @@
         <h2 style="margin: 0;">🛠️ Fallas Frecuentes en Campo</h2>
         <span id="contadorFallas" style="font-size: 0.9rem; color: #475569; font-weight: 600;"></span>
       </div>
+
+      <details id="panelPegarIA" class="ia-pegar-panel">
+        <summary>➕ Pegar y guardar diagnóstico desde Google Modo IA</summary>
+        <div class="ia-pegar-form">
+          <div class="ia-pegar-row">
+            <select id="iaSistema">
+              <option value="Electrónico">Electrónico</option>
+              <option value="Eléctrico">Eléctrico</option>
+              <option value="Mecánico e Hidráulico">Mecánico e Hidráulico</option>
+            </select>
+            <input type="text" id="iaSintoma" placeholder="Título / Síntoma (Ej. Wayne 3/Vista Error 58 WIP)">
+          </div>
+          <textarea id="iaTextoPegado" rows="4" placeholder="Pega aquí el texto copiado desde Google Modo IA..."></textarea>
+          <button type="button" onclick="guardarDiagnosticoIA()" class="btn-guardar-ia">💾 Guardar en Guía de Fallas</button>
+        </div>
+      </details>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+        <button type="button" onclick="copiarFallasParaCatalogo()" style="width: auto; padding: 0.45rem 0.9rem; background: #0f172a; color: #fff; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-top: 0;">
+          📋 Copiar fallas guardadas para fallas-data.js
+        </button>
+        <button type="button" onclick="limpiarFallasGuardadas()" style="width: auto; padding: 0.45rem 0.9rem; background: #dc2626; color: #fff; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-top: 0;">
+          🗑️ Limpiar guardadas en equipo
+        </button>
+      </div>
+
       <div id="contenedorFallas" class="fallas-grid"></div>
     </div>
 
