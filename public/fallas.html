@@ -9,6 +9,10 @@
     .section-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; }
     .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
     .controls-grid input, .controls-grid select { padding: 0.65rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #fff; }
+    .marca-bar { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.75rem; align-items: center; }
+    .marca-label { font-size: 0.82rem; font-weight: 700; color: #475569; margin-right: 0.25rem; }
+    .btn-marca { width: auto; margin-top: 0; padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid #cbd5e1; background: #fff; color: #1e293b; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+    .btn-marca.activa { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
     .ai-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; }
     .ai-box p { margin: 0.25rem 0 0; font-size: 0.9rem; color: #334155; }
     .btn-ai { background: #1d4ed8; color: #fff; border: none; padding: 0.65rem 1.1rem; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -58,6 +62,16 @@
           <option value="Electrónico">C. Sistema Electrónico</option>
         </select>
         <input type="text" id="modeloEquipo" placeholder="Modelo o marca (opcional, ej. Gilbarco, Wayne)" oninput="actualizarEnlaceIA()">
+      </div>
+
+      <div id="barraMarcas" class="marca-bar">
+        <span class="marca-label">Marca rápida:</span>
+        <button type="button" class="btn-marca activa" data-marca="" onclick="filtrarPorMarca('', this)">Todas</button>
+        <button type="button" class="btn-marca" data-marca="Gilbarco" onclick="filtrarPorMarca('Gilbarco', this)">Gilbarco</button>
+        <button type="button" class="btn-marca" data-marca="Wayne" onclick="filtrarPorMarca('Wayne', this)">Wayne</button>
+        <button type="button" class="btn-marca" data-marca="Tokheim" onclick="filtrarPorMarca('Tokheim', this)">Tokheim</button>
+        <button type="button" class="btn-marca" data-marca="Realtech" onclick="filtrarPorMarca('Realtech', this)">Realtech</button>
+        <button type="button" class="btn-marca" data-marca="EagleStar" onclick="filtrarPorMarca('EagleStar', this)">EagleStar</button>
       </div>
 
       <div class="ai-box">

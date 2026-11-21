@@ -106,6 +106,33 @@ function renderizarFallas(lista) {
   });
 }
 
+function marcarBotonMarcaActiva(marca) {
+  const botones = document.querySelectorAll("#barraMarcas .btn-marca");
+  botones.forEach((btn) => {
+    const esActiva = (btn.dataset.marca || "").toLowerCase() === (marca || "").toLowerCase();
+    btn.classList.toggle("activa", esActiva);
+  });
+}
+
+function filtrarPorMarca(marca, botonEl) {
+  const inputBusqueda = document.getElementById("buscarTexto");
+  const inputModelo = document.getElementById("modeloEquipo");
+
+  if (inputBusqueda) {
+    inputBusqueda.value = marca || "";
+  }
+  if (inputModelo) {
+    inputModelo.value = marca || "";
+  }
+
+  marcarBotonMarcaActiva(marca);
+  filtrarFallas();
+
+  if (botonEl) {
+    botonEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+  }
+}
+
 function filtrarFallas() {
   const inputBusqueda = document.getElementById("buscarTexto");
   const selectSistema = document.getElementById("filtroSistema");
@@ -121,6 +148,10 @@ function filtrarFallas() {
     const coincideTexto = !texto || contenido.includes(texto);
     return coincideSistema && coincideTexto;
   });
+
+  const marcaDetectada = ["gilbarco", "wayne", "tokheim", "realtech", "eaglestar"]
+    .find((m) => texto.includes(m)) || (texto === "" ? "" : "__ninguna__");
+  marcarBotonMarcaActiva(marcaDetectada);
 
   renderizarFallas(filtradas);
   actualizarEnlaceIA();
